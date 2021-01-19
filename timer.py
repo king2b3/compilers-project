@@ -32,4 +32,4 @@ class Timer():
         ''' Returns the End - Start.
         '''
         self.time = self.end_time - self.start_time
-        return 'Run time: {:0.4f}'.format(self.time)
+        return 'Run time: {:0.4f}\n'.format(self.time)

@@ -53,7 +53,10 @@ class Scanner(Compiler):
         ''' Writes the token to a file, and appends it to a list to be used in pickle
               Tokens can be printed too, based off of initial args parsed into the system
         '''
-        self.pickle_scan[self.line_counter].append(token)
+        try:
+            self.pickle_scan[self.line_counter].append(token)
+        except: 
+            self.pickle_scan[self.line_counter - 1].append(token)
         if self.print_bool: print(token)
     
     def nextChar(
@@ -88,6 +91,7 @@ class Scanner(Compiler):
 
         if self.current_char == '\0':
             return ('EOF','keyword')        
+        
         elif isNewLine(self.current_char):
             self.line_counter += 1
             self.nextChar()
@@ -108,7 +112,7 @@ class Scanner(Compiler):
                 self.nextChar()
         
         elif isComment(self.current_char):
-            if self.peak() == '*': # multiline comment
+            if self.peek() == '*': # multiline comment
                 self.nextChar()
                 comment_not_ended = True
                 while comment_not_ended:
@@ -124,6 +128,7 @@ class Scanner(Compiler):
                     if self.current_char == '\n':
                         self.nextChar()
                         comment_not_ended = False
+            self.nextChar()
 
         elif self.current_char in token_type.keys():
             token = (self.current_char,token_type[self.current_char])
@@ -131,7 +136,7 @@ class Scanner(Compiler):
         
         elif isLetter(self.current_char):
             token = self.current_char
-            while isNum(self.peek()) or isLetter(self.peek()):
+            while isNum(self.peek()) or isLetter(self.peek()) or self.peek() == '_':
                 self.nextChar()
                 token += self.current_char
             if token in reserved_words:

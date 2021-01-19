@@ -49,6 +49,9 @@ token_type = {
     '(': 'symbol',
     ')': 'symbol',
     ';': 'symbol',
-    '.': 'symbol'
+    '.': 'symbol',
+    '[': 'symbol',
+    ']': 'symbol',
+    '"': 'symbol'
 }
 

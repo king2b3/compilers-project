@@ -29,6 +29,8 @@ def parse_arguments(
             default="output")
     parser.add_argument("-p", "--Print", help="Prints out EVERYTHING",
             default=False, action="store_true")
+    parser.add_argument("-n", "--name", help="Prints file name",
+            default=False, action="store_true")
     args = parser.parse_args(args=args)
     return args
 
@@ -78,7 +80,7 @@ class Compiler():
 def main(
     input_file, 
     quiet=False, output_file="output",
-    Print=False
+    Print=False, name=False
 ) -> None:
     """Main function.
 
@@ -109,6 +111,10 @@ def main(
     if not os.path.isfile(input_file):
         raise FileNotFoundError("File not found: {}".format(input_file))
     
+    if name:
+        print('#######################')
+        print(input_file)
+        print('#######################')
     c = Compiler(input_file)
     s = Scanner(input_file,Print)
     compiler_timer.start_timer()
