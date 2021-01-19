@@ -1,34 +1,35 @@
 ''' Simple timer data structure
 '''
-
+import time
 class Timer():
     def __init__(
         self
     ):
-    '''
-        Timer class to track and report time usage to print
-    '''
-        import time
+        '''
+            Timer class to track and report time usage to print
+        '''
         self.start_time = 0
         self.end_time = 0
+        self.time = 0
 
     def start_timer(
         self
     ) -> None:
         ''' Records the start of a timer and resest both the start / end
         '''
-        self.start_timer = time.time()
+        self.start_time = time.time()
 
     def end_timer(
         self
     ) -> None:
         ''' Records the end value of a timer
         '''
-        self.end_timer = time.time()
+        self.end_time = time.time()
 
     def __str__(
         self
     ) -> float:
         ''' Returns the End - Start.
         '''
-        return self.end-time - self.start_time
+        self.time = self.end_time - self.start_time
+        return 'Run time: {:0.4f}'.format(self.time)

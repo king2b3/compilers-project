@@ -26,7 +26,9 @@ reserved_words = [
     'string',
     'bool',
     'enum',
-    'not'
+    'not',
+    'is',
+    'EOF'
 ]
 
 token_type = {

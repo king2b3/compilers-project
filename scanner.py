@@ -4,32 +4,69 @@
     Bayley King
 '''
 
+import pickle as pkl
+import csv
 from main import Compiler
 from tokens import token_type, reserved_words
 
-class Scanner():
+class Scanner(Compiler):
     def __init__(
-        self, filename
+        self, filename,
+        print_bool = False,
+        error_file='error_log.txt'
     ):
         self.line_counter = 0
+        self.error_file = error_file
         self.error_status = None
         self.f = open(filename, 'r').readlines()
+        self.total_lines = len(self.f)
+        self.f = ''.join(map(str, self.f))
         self.current_pos = -1
         self.current_char = ''
-        self.scanner_file_name = 'tempFiles/temp_scanner.txt'
+        self.text_out_name = 'tempFiles/temp_scanner.txt'
+        self.pickle_out_name = 'tempFiles/temp_scanner.pkl'
+        self.pickle_scan = [ [] for t in range(self.total_lines) ]
+        self.print_bool = print_bool
         self.nextChar()
-      
+
+    def scanFile(
+        self
+    ) -> None:
+        ''' Scans file and writes tokens to text and pickle file
+        '''
+        if self.print_bool: print('Scanning file now....')
+        token = self.getToken()
+        self.writeToken(token)
+        while token != ('EOF','keyword'): 
+            token = self.getToken()
+            if token != None:
+                self.writeToken(token)
+        pkl.dump(self.pickle_scan,open(self.pickle_out_name,'wb'))
+        with open(self.text_out_name,"w") as f:
+            wr = csv.writer(f)
+            wr.writerows(self.pickle_scan)
+        if self.print_bool: print('Scanning finished scanning. Scanned results written to file')
+    
+    def writeToken(
+        self, token
+    ) -> None:
+        ''' Writes the token to a file, and appends it to a list to be used in pickle
+              Tokens can be printed too, based off of initial args parsed into the system
+        '''
+        self.pickle_scan[self.line_counter].append(token)
+        if self.print_bool: print(token)
+    
     def nextChar(
         self
-    ) -> str:
+    ) -> None:
         ''' Moves onto the next character in the string
         '''
         self.current_pos += 1
         # make sure we don't look past the length of the string
-        if self.current_pos >= len(self.f[self.line_counter]):
+        if self.current_pos >= len(self.f):
             self.current_char = '\0' # End of line
         else:
-            self.current_char = self.f[self.line_counter[self.current_pos]]
+            self.current_char = self.f[self.current_pos]
         
     def peek(
         self
@@ -37,10 +74,10 @@ class Scanner():
         ''' Look at the next character in the line
         '''
 
-        if self.current_pos + 1 >= len(self.f[self.line_counter]):
+        if self.current_pos + 1 >= len(self.f):
             return '\0' # End of line
         else:
-            return self.f[self.line_counter[self.current_pos]]
+            return self.f[self.current_pos+1]
 
     def getToken(
         self
@@ -49,37 +86,10 @@ class Scanner():
         '''
         token = None
 
-        if isLetter(self.current_char):
-            token = self.current_char
-            while isNum(self.peek()) or isLetter(self.peek()):
-                self.nextChar()
-                token += self.current_char
-            if token in reserved_words:
-                token = (token,'keyword')  
-            else:
-                token = (token,'ID')
-            
-        elif isNum(self.current_char):
-            # check for int / float OR raise exception if decimal isn't correctly written
-            token = self.current_char
-            while self.peek().isdigit():
-                self.nextChar()
-                token += self.current_char
-            if self.peek() == '.':
-                self.nextChar()
-                token += self.current_char
-                if not self.peek().isdigit():
-                    # makes sure that there is at least one floating point after decimal
-                    message = 'Illegal character in number ' + self.line_counter
-                    Compiler.reportError(message)
-                while self.peek().isdigit():
-                    self.nextChar()
-                    token += self.current_char
-                token = (token,'ID')
-
+        if self.current_char == '\0':
+            return ('EOF','keyword')        
         elif isNewLine(self.current_char):
-            Compiler.line_counter += 1
-            self.current_pos = -1
+            self.line_counter += 1
             self.nextChar()
 
         elif isWhiteSpace(self.current_char):
@@ -92,8 +102,10 @@ class Scanner():
                 last_char = self.current_char
                 self.nextChar()
                 token = (last_char+self.current_char,token_type[last_char + self.current_char])
+                self.nextChar()
             else:
                 token = (self.current_char,token_type[self.current_char])
+                self.nextChar()
         
         elif isComment(self.current_char):
             if self.peak() == '*': # multiline comment
@@ -114,38 +126,47 @@ class Scanner():
                         comment_not_ended = False
 
         elif self.current_char in token_type.keys():
-            token = (self.current_line,token_type[self.current_char])
+            token = (self.current_char,token_type[self.current_char])
+            self.nextChar()
+        
+        elif isLetter(self.current_char):
+            token = self.current_char
+            while isNum(self.peek()) or isLetter(self.peek()):
+                self.nextChar()
+                token += self.current_char
+            if token in reserved_words:
+                token = (token,'keyword')  
+            else:
+                token = (token,'ID')
+            self.nextChar()
+            
+        elif isNum(self.current_char):
+            # check for int / float OR raise exception if decimal isn't correctly written
+            token = self.current_char
+            while self.peek().isdigit():
+                self.nextChar()
+                token += self.current_char
+            if self.peek() == '.':
+                self.nextChar()
+                token += self.current_char
+                if not self.peek().isdigit():
+                    # makes sure that there is at least one floating point after decimal
+                    message = 'Illegal character in number ' + str(self.line_counter +1)
+                    Compiler.reportError(message)
+                while self.peek().isdigit():
+                    self.nextChar()
+                    token += self.current_char
+            token = (token,'ID')
+            self.nextChar()
 
         else:
-            error_msg = 'Unknown token: ' + self.current_char
-            Compiler.reportError(error_msg)
-            pass
+            error_msg = 'Unknown token:' + self.current_char + \
+                ' on line ' + str(self.line_counter +1)
+            self.reportError(error_msg)
+            self.nextChar()
             # Unknown token
         return token
 
-    # archive? Nor sure if I can use regex, and anyway not worth using it
-    '''
-    def originalScan(
-        self
-    ) -> list:
-        # Scans the file for tokens.
-
-        #    Uses the regex library
-
-        #    Returns a list of lists, each list is the corresponding line of tokens from the file
-        
-        import re
-
-        for line in self.f:
-            Compiler.line_counter += 1
-            temp = line.rstrip()
-            temp = re.split(r'(\W+)',temp)
-            temp = [elem.strip() for elem in temp if elem not in ['','\t','\n',' ']] 
-            for t in range(len(temp)):
-                if temp[t] == ');':
-                    temp[t] = ')'
-                    temp.append(';')
-    '''
 
 def isLetter(
     char

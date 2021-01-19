@@ -27,7 +27,7 @@ def parse_arguments(
     parser.add_argument("input_file", help="Path to the input file.")
     parser.add_argument("-o", "--output_file", help="Path to the output file.",
             default="output")
-    parser.add_argument("-q", "--quiet", help="Don't print out non-errors",
+    parser.add_argument("-p", "--Print", help="Prints out EVERYTHING",
             default=False, action="store_true")
     args = parser.parse_args(args=args)
     return args
@@ -52,7 +52,6 @@ class Compiler():
     ) -> None:
         ''' Prints error to terminal, and writes errors to log
         '''
-        message =+ 'on line ' + self.line_counter
         self.writeToErrorFile(message)
         print(message)
         self.error_status = True
@@ -62,7 +61,6 @@ class Compiler():
     ) -> None:
         ''' Prints warnings to terminal, and writes warnings to log
         '''
-        message =+ 'on line ' + self.line_counter
         self.writeToErrorFile(message)
         print(message)
 
@@ -79,7 +77,8 @@ class Compiler():
 
 def main(
     input_file, 
-    quiet=False, output_file="output"
+    quiet=False, output_file="output",
+    Print=False
 ) -> None:
     """Main function.
 
@@ -102,22 +101,20 @@ def main(
     """
     #from timer import Timer
     from scanner import Scanner
+    from timer import Timer
 
-    #compiler_timer = Timer()
+    compiler_timer = Timer()
     
     # Error check if the file even exists
     if not os.path.isfile(input_file):
         raise FileNotFoundError("File not found: {}".format(input_file))
     
     c = Compiler(input_file)
-    s = Scanner(input_file)
-
-    token = s.getToken()
-    while token != '.':
-        print(token)
-        token = s.getToken()
-        c.error_status = s.error_status
-        c.line_counter = s.line_counter
+    s = Scanner(input_file,Print)
+    compiler_timer.start_timer()
+    s.scanFile()
+    compiler_timer.end_timer()
+    print(compiler_timer.__str__())
 
     return None
 
