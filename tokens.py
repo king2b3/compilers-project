@@ -32,19 +32,22 @@ reserved_words = [
 ]
 
 token_type = {
-    '+': 'symbol',
-    '-': 'symbol',
-    '<': 'symbol',
-    '<=': 'symbol',
-    '>': 'symbol',
-    '>=': 'symbol',
-    ':=': 'symbol',
-    '==': 'symbol',
-    '!=': 'symbol',
+    # (Speech, Token_Type)
+    '+': ArithOp,
+    '-': ArithOp,
+    '++': ArithOp,
+    '--': ArithOp,
+    '<': Relation,
+    '<=': Relation,
+    '>': Relation,
+    '>=': Relation,
+    ':=': Relation,
+    '==': Relation,
+    '!=': Relation,
     '&': 'symbol',
     '|': 'symbol',
-    '*': 'symbol',
-    '/': 'symbol',
+    '*': Term,
+    '/': Term,
     ':': 'symbol',
     '(': 'symbol',
     ')': 'symbol',
@@ -55,3 +58,33 @@ token_type = {
     '"': 'symbol'
 }
 
+class Token(object):
+    def __init__(
+        self, val,
+        children=None
+    ):
+        self.val = val
+        self.children = None
+
+class Program(Token):
+    def __init__(
+        self, val,
+        children=None
+    ):
+        Token.__init__(val,children)
+
+
+class Expression(Token):
+    def __init__(
+        self, val,
+        children=None
+    ):
+        Token.__init__(val,children)
+
+
+class ArithOp(Token):
+    def __init__(
+        self, val,
+        children=None
+    ):
+        Token.__init__(val,children)

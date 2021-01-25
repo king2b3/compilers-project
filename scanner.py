@@ -12,7 +12,7 @@ from tokens import token_type, reserved_words
 class Scanner(Compiler):
     def __init__(
         self, filename,
-        print_bool = False,
+        print_bool=False,
         error_file='error_log.txt'
     ):
         self.line_counter = 0
@@ -84,7 +84,7 @@ class Scanner(Compiler):
 
     def getToken(
         self
-    ) -> str:
+    ) -> tuple:
         ''' Gets the next token in a string
         '''
         token = None
@@ -101,14 +101,25 @@ class Scanner(Compiler):
             while isWhiteSpace(self.current_char):
                 self.nextChar()
         
+        elif isSpecialArithOp(self.current_char):
+            if (self.peek() == '+' and self.current_char == '+') or \
+                    (self.peek() == '-' and self.current_char == '-'):
+                last_char = self.current_char
+                self.nextChar()
+                token = (token_type[last_char + self.current_char],last_char+self.current_char)
+                self.nextChar()
+            else:
+                token = (token_type[self.current_char],self.current_char)
+                self.nextChar()
+ 
         elif isSpecialEqualToken(self.current_char):
             if self.peek() == '=':
                 last_char = self.current_char
                 self.nextChar()
-                token = (last_char+self.current_char,token_type[last_char + self.current_char])
+                token = (token_type[last_char + self.current_char],last_char+self.current_char)
                 self.nextChar()
             else:
-                token = (self.current_char,token_type[self.current_char])
+                token = (token_type[self.current_char],self.current_char)
                 self.nextChar()
         
         elif isComment(self.current_char):
@@ -130,8 +141,8 @@ class Scanner(Compiler):
                         comment_not_ended = False
             self.nextChar()
 
-        elif self.current_char in token_type.keys():
-            token = (self.current_char,token_type[self.current_char])
+        elif isSingleCharSymbol(self.current_char):
+            token = (token_type[self.current_char],self.current_char)
             self.nextChar()
         
         elif isLetter(self.current_char):
@@ -140,9 +151,9 @@ class Scanner(Compiler):
                 self.nextChar()
                 token += self.current_char
             if token in reserved_words:
-                token = (token,'keyword')  
+                token = ('keyword',token)  
             else:
-                token = (token,'ID')
+                token = ('ID',token)
             self.nextChar()
             
         elif isNum(self.current_char):
@@ -161,7 +172,7 @@ class Scanner(Compiler):
                 while self.peek().isdigit():
                     self.nextChar()
                     token += self.current_char
-            token = (token,'ID')
+            token = ('ID',token)
             self.nextChar()
 
         else:
@@ -187,6 +198,16 @@ def isSpecialEqualToken(
     char
 ) -> bool:
     return char == '>' or char == '<' or char == '!' or char == ':' or char == '='
+
+def isSingleCharSymbol(
+    char
+) ->:
+    return char in token_type.keys()
+
+def isSpecialArithOp(
+    char
+) -> bool:
+    return char == '+' or char == '-'
 
 def isWhiteSpace(
     char
