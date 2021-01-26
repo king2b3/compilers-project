@@ -101,7 +101,7 @@ class Scanner(Compiler):
             while isWhiteSpace(self.current_char):
                 self.nextChar()
         
-        elif isSpecialArithOp(self.current_char):
+        elif isSpecialArithOp(self.current_char): # might be able to remove
             if (self.peek() == '+' and self.current_char == '+') or \
                     (self.peek() == '-' and self.current_char == '-'):
                 last_char = self.current_char
@@ -141,6 +141,14 @@ class Scanner(Compiler):
                         comment_not_ended = False
             self.nextChar()
 
+        elif isString(self.current_char):
+            token = self.current_char
+            while self.peek() != '"':
+                self.nextChar()
+                token += self.current_char
+            return ('Literal',token)
+            self.nextChar()
+        
         elif isSingleCharSymbol(self.current_char):
             token = (token_type[self.current_char],self.current_char)
             self.nextChar()
@@ -150,8 +158,9 @@ class Scanner(Compiler):
             while isNum(self.peek()) or isLetter(self.peek()) or self.peek() == '_':
                 self.nextChar()
                 token += self.current_char
+            token = token.lower()
             if token in reserved_words:
-                token = ('keyword',token)  
+                token = ('Keyword',token)  
             else:
                 token = ('ID',token)
             self.nextChar()
@@ -167,7 +176,7 @@ class Scanner(Compiler):
                 token += self.current_char
                 if not self.peek().isdigit():
                     # makes sure that there is at least one floating point after decimal
-                    message = 'Illegal character in number ' + str(self.line_counter +1)
+                    message = 'Illegal character in line number ' + str(self.line_counter +1)
                     Compiler.reportError(message)
                 while self.peek().isdigit():
                     self.nextChar()
@@ -183,6 +192,11 @@ class Scanner(Compiler):
             # Unknown token
         return token
 
+
+def isString(
+    char
+) -> bool:
+    return char == '"'
 
 def isLetter(
     char
@@ -201,7 +215,7 @@ def isSpecialEqualToken(
 
 def isSingleCharSymbol(
     char
-) ->:
+) -> bool:
     return char in token_type.keys()
 
 def isSpecialArithOp(
