@@ -2,6 +2,7 @@
 test.py
 project_info/
 tempFiles/
+.vscode
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
