@@ -37,7 +37,7 @@ class Scanner(Compiler):
         if self.print_bool: print('Scanning file now....')
         token = self.getToken()
         self.writeToken(token)
-        while token != ('EOF','keyword'): 
+        while token != ('Keyword','EOF'): 
             token = self.getToken()
             if token != None:
                 self.writeToken(token)
@@ -90,7 +90,7 @@ class Scanner(Compiler):
         token = None
 
         if self.current_char == '\0':
-            return ('EOF','keyword')        
+            token = ('Keyword','EOF')        
         
         elif isNewLine(self.current_char):
             self.line_counter += 1
@@ -146,8 +146,10 @@ class Scanner(Compiler):
             while self.peek() != '"':
                 self.nextChar()
                 token += self.current_char
-            return ('Literal',token)
             self.nextChar()
+            token += self.current_char  
+            self.nextChar()
+            token = ('Literal',token)
         
         elif isSingleCharSymbol(self.current_char):
             token = (token_type[self.current_char],self.current_char)

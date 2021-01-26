@@ -1,0 +1,3 @@
+[submodule "compiler_theory_test_programs"]
+	path = compiler_theory_test_programs
+	url = git@github.com:stegnerw/compiler_theory_test_programs.git

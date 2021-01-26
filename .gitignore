@@ -1,13 +1,12 @@
 # my files
 test.py
 project_info/
-
+tempFiles/
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
 *$py.class
-tempFiles/
 
 # C extensions
 *.so
