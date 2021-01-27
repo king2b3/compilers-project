@@ -69,33 +69,59 @@ token_type = {
     ',': 'comma'
 }
 
-class Token(object):
+
+# Make the attributes a dictionary? Then we could add whatever we would like to them.
+class SymbolTable(object):
     def __init__(
-        self, val,
-        children=None
+        self,
+        print_bool=False 
     ):
-        self.val = val
-        self.children = None
+        self.table = {}
 
-class Program(Token):
-    def __init__(
-        self, val,
-        children=None
-    ):
-        Token.__init__(val,children)
+    def allocate(
+        self, symbol
+    ) -> object:
+        ''' Allocates a new empty symbol table
+        '''
+        self.table[symbol] = SymbolTable()
+    
+    def free(
+        self
+    ) -> None:
+        ''' Removes all the entries of a table
+        '''
+        None
+    
+    def lookup(
+        self, name
+    ) -> object:
+        ''' Returns the reference to the symbol's class
+        '''
+        None
+    
+    def insert(
+        self, symbol,
+        symbol_type
+    ) -> None:
+        ''' Adds a symbol to the table. If symbol is already in the table, pass.
+        '''
+        # checks if symbol is in the table 
+        if symbol in self.table:
+            pass
+        else:
+            self.table[symbol] = symbol_type
+    
+    def set_attribute(
+        self, name,
+        attr
+    ) -> None:
+        ''' Sets an attribute for a given entry
+        '''
+        None
 
+    def get_attribute(
+        self, name
+    ) -> None:
+        ''' Returns an attribute. Just not sure what the type of an attribute is yet.
+        '''
 
-class Expression(Token):
-    def __init__(
-        self, val,
-        children=None
-    ):
-        Token.__init__(val,children)
-
-
-class ArithOp(Token):
-    def __init__(
-        self, val,
-        children=None
-    ):
-        Token.__init__(val,children)
