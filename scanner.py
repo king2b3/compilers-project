@@ -29,6 +29,103 @@ class Scanner(Compiler):
         self.print_bool = print_bool
         self.nextChar()
 
+        def EOF(
+            self
+        ) -> tuple:
+            return ('Keyword','EOF')
+            
+        def NewLine(
+            self
+        ) -> None:
+            self.line_counter += 1
+            self.nextChar()
+        
+        def WhiteSpace(
+            self
+        ) -> None:
+            self.nextChar()
+            while isWhiteSpace(self.current_char):
+                self.nextChar()
+
+        def String(
+            self
+        ) -> tuple:
+            token = self.current_char
+            while self.peek() != '"':
+                self.nextChar()
+                token += self.current_char
+            self.nextChar()
+            token += self.current_char  
+            self.nextChar()
+            return ('Literal',token)
+
+        def SpecialEquals(
+            self
+        ) -> tuple:
+            if self.peek() == '=':
+                last_char = self.current_char
+                self.nextChar()
+                token = (token_type[last_char + self.current_char],last_char+self.current_char)
+                self.nextChar()
+            else:
+                token = (token_type[self.current_char],self.current_char)
+                self.nextChar()
+            return token
+
+        def SpecialAdd(
+            self
+        ) -> tuple:
+            if (self.peek() == '+' and self.current_char == '+') or \
+                    (self.peek() == '-' and self.current_char == '-'):
+                last_char = self.current_char
+                self.nextChar()
+                token = (token_type[last_char + self.current_char],last_char+self.current_char)
+                self.nextChar()
+            else:
+                token = (token_type[self.current_char],self.current_char)
+                self.nextChar()
+            return token
+
+        def Comment(
+            self
+        ) -> None:
+            if self.peek() == '*': # multiline comment
+                self.nextChar()
+                comment_not_ended = True
+                while comment_not_ended:
+                    self.nextChar()
+                    if self.current_char == '*' and self.peek() == '/':
+                        self.nextChar()
+                        comment_not_ended = False
+            elif self.peek() == '/': #  single line comment 
+                self.nextChar()
+                comment_not_ended = True
+                while comment_not_ended:
+                    self.nextChar()
+                    if self.current_char == '\n':
+                        self.nextChar()
+                        comment_not_ended = False
+            self.nextChar()
+        
+        self.get_token_hash = {
+        '\0': EOF,
+        '\n': NewLine,
+        '\t': WhiteSpace,
+        '\r': WhiteSpace,
+        ' ': WhiteSpace,
+        '"': String,
+        '>': SpecialEquals,
+        '<': SpecialEquals,
+        '!': SpecialEquals,
+        ':': SpecialEquals,
+        '=': SpecialEquals,
+        '+': SpecialAdd,
+        '-': SpecialAdd,
+        '/': Comment
+    } 
+
+
+
     def scanFile(
         self
     ) -> None:
@@ -82,6 +179,7 @@ class Scanner(Compiler):
         else:
             return self.f[self.current_pos+1]
 
+
     def getToken(
         self
     ) -> tuple:
@@ -89,153 +187,50 @@ class Scanner(Compiler):
         '''
         token = None
 
-        if self.current_char == '\0':
-            token = ('Keyword','EOF')        
-        
-        elif isNewLine(self.current_char):
-            self.line_counter += 1
-            self.nextChar()
+        try:
+            print('pass')
+            self.get_token_hash[self.current_char]()
+        except:
 
-        elif isWhiteSpace(self.current_char):
-            self.nextChar()
-            while isWhiteSpace(self.current_char):
-                self.nextChar()
-        
-        elif isSpecialArithOp(self.current_char): # might be able to remove
-            if (self.peek() == '+' and self.current_char == '+') or \
-                    (self.peek() == '-' and self.current_char == '-'):
-                last_char = self.current_char
-                self.nextChar()
-                token = (token_type[last_char + self.current_char],last_char+self.current_char)
-                self.nextChar()
-            else:
+            if self.current_char in token_type:
                 token = (token_type[self.current_char],self.current_char)
                 self.nextChar()
- 
-        elif isSpecialEqualToken(self.current_char):
-            if self.peek() == '=':
-                last_char = self.current_char
-                self.nextChar()
-                token = (token_type[last_char + self.current_char],last_char+self.current_char)
-                self.nextChar()
-            else:
-                token = (token_type[self.current_char],self.current_char)
-                self.nextChar()
-        
-        elif isComment(self.current_char):
-            if self.peek() == '*': # multiline comment
-                self.nextChar()
-                comment_not_ended = True
-                while comment_not_ended:
-                    self.nextChar()
-                    if self.current_char == '*' and self.peek() == '/':
-                        self.nextChar()
-                        comment_not_ended = False
-            elif self.peek() == '/': #  single line comment 
-                self.nextChar()
-                comment_not_ended = True
-                while comment_not_ended:
-                    self.nextChar()
-                    if self.current_char == '\n':
-                        self.nextChar()
-                        comment_not_ended = False
-            self.nextChar()
-
-        elif isString(self.current_char):
-            token = self.current_char
-            while self.peek() != '"':
-                self.nextChar()
-                token += self.current_char
-            self.nextChar()
-            token += self.current_char  
-            self.nextChar()
-            token = ('Literal',token)
-        
-        elif isSingleCharSymbol(self.current_char):
-            token = (token_type[self.current_char],self.current_char)
-            self.nextChar()
-        
-        elif isLetter(self.current_char):
-            token = self.current_char
-            while isNum(self.peek()) or isLetter(self.peek()) or self.peek() == '_':
-                self.nextChar()
-                token += self.current_char
-            token = token.lower()
-            if token in reserved_words:
-                token = ('Keyword',token)  
-            else:
-                token = ('ID',token)
-            self.nextChar()
             
-        elif isNum(self.current_char):
-            # check for int / float OR raise exception if decimal isn't correctly written
-            token = self.current_char
-            while self.peek().isdigit():
+            elif self.current_char.isalpha():
+                token = self.current_char
+                while self.peek().isalpha() or self.peek().isalpha() or self.peek() == '_':
+                    self.nextChar()
+                    token += self.current_char
+                token = token.lower()
+                if token in reserved_words:
+                    token = ('Keyword',token)  
+                else:
+                    token = ('ID',token)
                 self.nextChar()
-                token += self.current_char
-            if self.peek() == '.':
-                self.nextChar()
-                token += self.current_char
-                if not self.peek().isdigit():
-                    # makes sure that there is at least one floating point after decimal
-                    message = 'Illegal character in line number ' + str(self.line_counter +1)
-                    Compiler.reportError(message)
+                
+            elif self.current_char.isdigit():
+                # check for int / float OR raise exception if decimal isn't correctly written
+                token = self.current_char
                 while self.peek().isdigit():
                     self.nextChar()
                     token += self.current_char
-            token = ('ID',token)
-            self.nextChar()
+                if self.peek() == '.':
+                    self.nextChar()
+                    token += self.current_char
+                    if not self.peek().isdigit():
+                        # makes sure that there is at least one floating point after decimal
+                        message = 'Illegal character in line number ' + str(self.line_counter +1)
+                        Compiler.reportError(message)
+                    while self.peek().isdigit():
+                        self.nextChar()
+                        token += self.current_char
+                token = ('ID',token)
+                self.nextChar()
 
-        else:
-            error_msg = 'Unknown token:' + self.current_char + \
-                ' on line ' + str(self.line_counter +1)
-            self.reportError(error_msg)
-            self.nextChar()
-            # Unknown token
-        return token
-
-
-def isString(
-    char
-) -> bool:
-    return char == '"'
-
-def isLetter(
-    char
-) -> bool:
-    return char.isalpha()
-
-def isNum(
-    char
-) -> bool:
-    return char.isnumeric()
-
-def isSpecialEqualToken(
-    char
-) -> bool:
-    return char == '>' or char == '<' or char == '!' or char == ':' or char == '='
-
-def isSingleCharSymbol(
-    char
-) -> bool:
-    return char in token_type.keys()
-
-def isSpecialArithOp(
-    char
-) -> bool:
-    return char == '+' or char == '-'
-
-def isWhiteSpace(
-    char
-) -> bool:
-    return char == '\t' or char == ' ' or char == '\r'
-
-def isComment(
-    char
-) -> bool:
-    return char == '/'
-
-def isNewLine(
-    char
-) -> bool:
-    return char == '\n'
+            else:
+                error_msg = 'Unknown token:' + self.current_char + \
+                    ' on line ' + str(self.line_counter +1)
+                self.reportError(error_msg)
+                self.nextChar()
+                # Unknown token
+            return token
