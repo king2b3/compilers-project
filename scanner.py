@@ -10,11 +10,7 @@ from main import Compiler
 from tokens import token_type, reserved_words
 
 class Scanner(Compiler):
-    def __init__(
-        self, filename,
-        print_bool=False,
-        error_file='error_log.txt'
-    ):
+    def __init__(self, filename, print_bool=False, error_file='error_log.txt') -> None:
         self.line_counter = 0
         self.error_file = error_file
         self.error_status = None
@@ -29,9 +25,7 @@ class Scanner(Compiler):
         self.print_bool = print_bool
         self.nextChar()
 
-    def scanFile(
-        self
-    ) -> None:
+    def scanFile(self) -> None:
         ''' Scans file and writes tokens to text and pickle file
         '''
         if self.print_bool: print('Scanning file now....')
@@ -47,9 +41,7 @@ class Scanner(Compiler):
             wr.writerows(self.pickle_scan)
         if self.print_bool: print('Scanning finished scanning. Scanned results written to file')
     
-    def writeToken(
-        self, token
-    ) -> None:
+    def writeToken(self, token) -> None:
         ''' Writes the token to a file, and appends it to a list to be used in pickle
               Tokens can be printed too, based off of initial args parsed into the system
         '''
@@ -59,9 +51,7 @@ class Scanner(Compiler):
             self.pickle_scan[self.line_counter - 1].append(token)
         if self.print_bool: print(token)
     
-    def nextChar(
-        self
-    ) -> None:
+    def nextChar(self) -> None:
         ''' Moves onto the next character in the string
         '''
         self.current_pos += 1
@@ -71,9 +61,7 @@ class Scanner(Compiler):
         else:
             self.current_char = self.f[self.current_pos]
         
-    def peek(
-        self
-    ) -> str:
+    def peek(self) -> str:
         ''' Look at the next character in the line
         '''
 
@@ -82,9 +70,7 @@ class Scanner(Compiler):
         else:
             return self.f[self.current_pos+1]
 
-    def getToken(
-        self
-    ) -> tuple:
+    def getToken(self) -> tuple:
         ''' Gets the next token in a string
         '''
         token = None
@@ -195,47 +181,29 @@ class Scanner(Compiler):
         return token
 
 
-def isString(
-    char
-) -> bool:
+def isString(char) -> bool:
     return char == '"'
 
-def isLetter(
-    char
-) -> bool:
+def isLetter(char) -> bool:
     return char.isalpha()
 
-def isNum(
-    char
-) -> bool:
+def isNum(char) -> bool:
     return char.isnumeric()
 
-def isSpecialEqualToken(
-    char
-) -> bool:
+def isSpecialEqualToken(char) -> bool:
     return char == '>' or char == '<' or char == '!' or char == ':' or char == '='
 
-def isSingleCharSymbol(
-    char
-) -> bool:
+def isSingleCharSymbol(char) -> bool:
     return char in token_type.keys()
 
-def isSpecialArithOp(
-    char
-) -> bool:
+def isSpecialArithOp(char) -> bool:
     return char == '+' or char == '-'
 
-def isWhiteSpace(
-    char
-) -> bool:
+def isWhiteSpace(char) -> bool:
     return char == '\t' or char == ' ' or char == '\r'
 
-def isComment(
-    char
-) -> bool:
+def isComment(char) -> bool:
     return char == '/'
 
-def isNewLine(
-    char
-) -> bool:
+def isNewLine(char) -> bool:
     return char == '\n'

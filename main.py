@@ -50,10 +50,7 @@ bcolors = {
 
 
 class Compiler():
-    def __init__(
-        self, filename,
-        error_file='error_log.txt'
-    ):
+    def __init__(self, filename, error_file='error_log.txt') -> None:
         self.filename = filename
         self.line_counter = 0
         self.error_status = None
@@ -63,27 +60,21 @@ class Compiler():
         #self.s = Scanner()
 
 
-    def reportError(
-        self, message
-    ) -> None:
+    def reportError(self, message) -> None:
         ''' Prints error to terminal, and writes errors to log
         '''
         self.writeToErrorFile(message)
         print(message)
         self.error_status = True
     
-    def reportWarning(
-        self, message
-    ) -> None:
+    def reportWarning(self, message) -> None:
         ''' Prints warnings to terminal, and writes warnings to log
         '''
         self.writeToErrorFile(message)
         print(message)
 
 
-    def writeToErrorFile(
-        self, message
-    ) -> None:
+    def writeToErrorFile(self, message) -> None:
         ''' Writes error messages to text file
         '''
         ef = open(self.error_file,'w')
@@ -91,11 +82,7 @@ class Compiler():
         ef.close()
 
 
-def main(
-    input_file, 
-    quiet=False, output_file="output",
-    Print=False, name=False
-) -> None:
+def main(input_file, quiet=False, output_file="output", Print=False, name=False) -> None:
     """Main function.
 
     Parameters
