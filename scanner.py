@@ -86,7 +86,7 @@ class Scanner(Compiler):
     def eatComments(self, token=None) -> None:    
         ''' Eats whitespace
         '''
-        if isComment(self.current_char):
+        while isComment(self.current_char):
             if self.peek() == '*': # multiline comment
                 self.nextChar()
                 comment_not_ended = True
@@ -125,8 +125,9 @@ class Scanner(Compiler):
         '''
         token = None
 
-        self.eatWhiteSpace()
         token = self.eatComments()
+        self.eatWhiteSpace()
+        
 
         if self.current_char == '\0':
             token = ('Keyword','EOF')        
@@ -138,9 +139,11 @@ class Scanner(Compiler):
                 self.nextChar()
                 token = (token_type[last_char + self.current_char],last_char+self.current_char)
                 self.nextChar()
+                _ = self.eatComments()
             else:
                 token = (token_type[self.current_char],self.current_char)
                 self.nextChar()
+                _ = self.eatComments()
  
         elif isSpecialEqualToken(self.current_char):
             if self.peek() == '=':
@@ -148,9 +151,11 @@ class Scanner(Compiler):
                 self.nextChar()
                 token = (token_type[last_char + self.current_char],last_char+self.current_char)
                 self.nextChar()
+                _ = self.eatComments()
             else:
                 token = (token_type[self.current_char],self.current_char)
                 self.nextChar()
+                _ = self.eatComments()
 
         elif isString(self.current_char):
             token = self.current_char
@@ -161,10 +166,12 @@ class Scanner(Compiler):
             token += self.current_char  
             self.nextChar()
             token = ('Literal',token)
+            _ = self.eatComments()
         
         elif isSingleCharSymbol(self.current_char):
             token = (token_type[self.current_char],self.current_char)
             self.nextChar()
+            _ = self.eatComments()
         
         elif isLetter(self.current_char):
             token = self.current_char
@@ -177,6 +184,7 @@ class Scanner(Compiler):
             else:
                 token = ('ID',token)
             self.nextChar()
+            _ = self.eatComments()
             
         elif isNum(self.current_char):
             # check for int / float OR raise exception if decimal isn't correctly written
@@ -196,13 +204,16 @@ class Scanner(Compiler):
                     token += self.current_char
             token = ('ID',token)
             self.nextChar()
+            _ = self.eatComments()
 
         else:
+            print(isWhiteSpace(self.current_char))
             error_msg = 'Unknown token:' + self.current_char + \
-                ' on line ' + str(self.line_counter +1)
+                ' on line ' + str(self.line_counter)
             self.reportError(error_msg)
             self.nextChar()
             # Unknown token
+
         return token
 
 
