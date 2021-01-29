@@ -70,23 +70,67 @@ class Scanner(Compiler):
         else:
             return self.f[self.current_pos+1]
 
+    def eatWhiteSpace(self) -> None:
+        ''' Eats all whitespace
+        '''
+        while isNewLine(self.current_char) or isWhiteSpace(self.current_char):
+            if isNewLine(self.current_char):
+                self.line_counter += 1
+                self.nextChar()
+
+            if isWhiteSpace(self.current_char):
+                self.nextChar()
+                while isWhiteSpace(self.current_char):
+                    self.nextChar()
+
+    def eatComments(self, token=None) -> None:    
+        ''' Eats whitespace
+        '''
+        if isComment(self.current_char):
+            if self.peek() == '*': # multiline comment
+                self.nextChar()
+                comment_not_ended = True
+                num_blocks = 0
+                while comment_not_ended and num_blocks == 0:
+                    comment_not_ended = True
+                    self.nextChar()
+                    if checkEOF(self.current_char): 
+                        error_msg = 'Block comment not ended on line' + str(self.line_counter +1)
+                        self.reportWarning(error_msg)
+                        token = ('Keyword','EOF')
+                    if self.current_char == '*' and self.peek() == '/':
+                        self.nextChar()
+                        num_blocks -= 1
+                        comment_not_ended = False
+                    elif self.current_char == '/' and self.peek() == '*':
+                        num_blocks += 1
+
+            elif self.peek() == '/': #  single line comment 
+                self.nextChar()
+                comment_not_ended = True
+                while comment_not_ended:
+                    if checkEOF(self.current_char): 
+                        token = ('Keyword','EOF')
+                        comment_not_ended = False
+                    self.nextChar()
+                    if isNewLine(self.current_char):
+                        self.line_counter += 1
+                        #self.nextChar()
+                        comment_not_ended = False
+            self.nextChar()
+            return token
+    
     def getToken(self) -> tuple:
         ''' Gets the next token in a string
         '''
         token = None
 
+        self.eatWhiteSpace()
+        token = self.eatComments()
+
         if self.current_char == '\0':
             token = ('Keyword','EOF')        
-        
-        elif isNewLine(self.current_char):
-            self.line_counter += 1
-            self.nextChar()
-
-        elif isWhiteSpace(self.current_char):
-            self.nextChar()
-            while isWhiteSpace(self.current_char):
-                self.nextChar()
-        
+                
         elif isSpecialArithOp(self.current_char): # might be able to remove
             if (self.peek() == '+' and self.current_char == '+') or \
                     (self.peek() == '-' and self.current_char == '-'):
@@ -107,37 +151,6 @@ class Scanner(Compiler):
             else:
                 token = (token_type[self.current_char],self.current_char)
                 self.nextChar()
-        
-        elif isComment(self.current_char):
-            if self.peek() == '*': # multiline comment
-                self.nextChar()
-                comment_not_ended = True
-                num_blocks = 0
-                while comment_not_ended and num_blocks == 0:
-                    comment_not_ended = True
-                    self.nextChar()
-                    if checkEOF(self.current_char): 
-                        error_msg = 'Block comment not ended on line' + str(self.line_counter +1)
-                        self.reportWarning(error_msg)
-                        return ('Keyword','EOF')
-                    if self.current_char == '*' and self.peek() == '/':
-                        self.nextChar()
-                        num_blocks -= 1
-                        comment_not_ended = False
-                    elif self.current_char == '/' and self.peek() == '*':
-                        num_blocks += 1
-
-            elif self.peek() == '/': #  single line comment 
-                self.nextChar()
-                comment_not_ended = True
-                while comment_not_ended:
-                    if checkEOF(self.current_char): 
-                        return ('Keyword','EOF')
-                    self.nextChar()
-                    if self.current_char == '\n':
-                        self.nextChar()
-                        comment_not_ended = False
-            self.nextChar()
 
         elif isString(self.current_char):
             token = self.current_char
