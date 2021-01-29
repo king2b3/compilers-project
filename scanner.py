@@ -112,15 +112,27 @@ class Scanner(Compiler):
             if self.peek() == '*': # multiline comment
                 self.nextChar()
                 comment_not_ended = True
-                while comment_not_ended:
+                num_blocks = 0
+                while comment_not_ended and num_blocks == 0:
+                    comment_not_ended = True
                     self.nextChar()
+                    if checkEOF(self.current_char): 
+                        error_msg = 'Block comment not ended on line' + str(self.line_counter +1)
+                        self.reportWarning(error_msg)
+                        return ('Keyword','EOF')
                     if self.current_char == '*' and self.peek() == '/':
                         self.nextChar()
+                        num_blocks -= 1
                         comment_not_ended = False
+                    elif self.current_char == '/' and self.peek() == '*':
+                        num_blocks += 1
+
             elif self.peek() == '/': #  single line comment 
                 self.nextChar()
                 comment_not_ended = True
                 while comment_not_ended:
+                    if checkEOF(self.current_char): 
+                        return ('Keyword','EOF')
                     self.nextChar()
                     if self.current_char == '\n':
                         self.nextChar()
@@ -180,6 +192,9 @@ class Scanner(Compiler):
             # Unknown token
         return token
 
+
+def checkEOF(char) -> bool:
+    return char == '\0'
 
 def isString(char) -> bool:
     return char == '"'
