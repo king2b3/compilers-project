@@ -45,10 +45,6 @@ class Scanner(Compiler):
         ''' Writes the token to a file, and appends it to a list to be used in pickle
               Tokens can be printed too, based off of initial args parsed into the system
         '''
-        try:
-            self.pickle_scan[self.line_counter].append(token)
-        except: 
-            self.pickle_scan[self.line_counter - 1].append(token)
         if self.print_bool: print(token)
     
     def nextChar(self) -> None:
@@ -73,31 +69,26 @@ class Scanner(Compiler):
     def eatWhiteSpace(self) -> None:
         ''' Eats all whitespace
         '''
-        while isNewLine(self.current_char) or isWhiteSpace(self.current_char):
-            if isNewLine(self.current_char):
-                self.line_counter += 1
-                self.nextChar()
-
-            if isWhiteSpace(self.current_char):
-                self.nextChar()
-                while isWhiteSpace(self.current_char):
-                    self.nextChar()
-
+        while self.current_char == ' ' or self.current_char == '\t' or self.current_char == '\r':
+            self.nextChar()
+                
     def eatComments(self, token=None) -> None:    
-        ''' Eats whitespace
+        ''' Eats comments
         '''
-        while isComment(self.current_char):
+        while self.current_char == '/' and (self.peek() == '*' or self.peek() == '/'):
             if self.peek() == '*': # multiline comment
                 self.nextChar()
                 comment_not_ended = True
-                num_blocks = 0
-                while comment_not_ended and num_blocks == 0:
+                num_blocks = 1
+                while comment_not_ended or num_blocks != 0:
                     comment_not_ended = True
                     self.nextChar()
-                    if checkEOF(self.current_char): 
+                    if self.current_char == '\0': 
                         error_msg = 'Block comment not ended on line' + str(self.line_counter +1)
                         self.reportWarning(error_msg)
-                        token = ('Keyword','EOF')
+                        self.current_char = '\0'
+                        comment_not_ended = False 
+                        num_blocks = 0
                     if self.current_char == '*' and self.peek() == '/':
                         self.nextChar()
                         num_blocks -= 1
@@ -109,55 +100,45 @@ class Scanner(Compiler):
                 self.nextChar()
                 comment_not_ended = True
                 while comment_not_ended:
-                    if checkEOF(self.current_char): 
-                        token = ('Keyword','EOF')
-                        comment_not_ended = False
                     self.nextChar()
-                    if isNewLine(self.current_char):
-                        self.line_counter += 1
-                        #self.nextChar()
+                    if self.current_char == '\0': 
                         comment_not_ended = False
-            self.nextChar()
-            return token
+                    if self.current_char == '\n':
+                        self.line_counter += 1
+                        comment_not_ended = False
     
     def getToken(self) -> tuple:
         ''' Gets the next token in a string
         '''
         token = None
-
-        token = self.eatComments()
-        self.eatWhiteSpace()
         
+        self.eatWhiteSpace()
+        self.eatComments()
+
+        while self.current_char == '/': # 
+            self.nextChar()
+            self.eatComments()
 
         if self.current_char == '\0':
             token = ('Keyword','EOF')        
-                
-        elif isSpecialArithOp(self.current_char): # might be able to remove
-            if (self.peek() == '+' and self.current_char == '+') or \
-                    (self.peek() == '-' and self.current_char == '-'):
-                last_char = self.current_char
-                self.nextChar()
-                token = (token_type[last_char + self.current_char],last_char+self.current_char)
-                self.nextChar()
-                _ = self.eatComments()
-            else:
-                token = (token_type[self.current_char],self.current_char)
-                self.nextChar()
-                _ = self.eatComments()
- 
-        elif isSpecialEqualToken(self.current_char):
+        
+        elif self.current_char == '\n':
+            self.line_counter += 1
+            self.nextChar()
+            #token = ('NewLine',None)            
+
+        elif self.current_char == '>' or self.current_char == '<' or self.current_char == '!' \
+                    or self.current_char == ':' or self.current_char == '=':
             if self.peek() == '=':
                 last_char = self.current_char
                 self.nextChar()
                 token = (token_type[last_char + self.current_char],last_char+self.current_char)
                 self.nextChar()
-                _ = self.eatComments()
             else:
                 token = (token_type[self.current_char],self.current_char)
                 self.nextChar()
-                _ = self.eatComments()
 
-        elif isString(self.current_char):
+        elif self.current_char == '"':
             token = self.current_char
             while self.peek() != '"':
                 self.nextChar()
@@ -166,16 +147,14 @@ class Scanner(Compiler):
             token += self.current_char  
             self.nextChar()
             token = ('Literal',token)
-            _ = self.eatComments()
         
-        elif isSingleCharSymbol(self.current_char):
+        elif self.current_char in token_type.keys():
             token = (token_type[self.current_char],self.current_char)
             self.nextChar()
-            _ = self.eatComments()
         
-        elif isLetter(self.current_char):
+        elif self.current_char.isalpha():
             token = self.current_char
-            while isNum(self.peek()) or isLetter(self.peek()) or self.peek() == '_':
+            while self.peek().isnumeric() or self.peek().isalpha() or self.peek() == '_':
                 self.nextChar()
                 token += self.current_char
             token = token.lower()
@@ -184,18 +163,17 @@ class Scanner(Compiler):
             else:
                 token = ('ID',token)
             self.nextChar()
-            _ = self.eatComments()
             
-        elif isNum(self.current_char):
+        elif self.current_char.isnumeric():
             # check for int / float OR raise exception if decimal isn't correctly written
             token = self.current_char
-            while self.peek().isdigit():
+            while self.peek().isnumeric():
                 self.nextChar()
                 token += self.current_char
             if self.peek() == '.':
                 self.nextChar()
                 token += self.current_char
-                if not self.peek().isdigit():
+                if not self.peek().isnumeric():
                     # makes sure that there is at least one floating point after decimal
                     message = 'Illegal character in line number ' + str(self.line_counter +1)
                     Compiler.reportError(message)
@@ -204,10 +182,8 @@ class Scanner(Compiler):
                     token += self.current_char
             token = ('ID',token)
             self.nextChar()
-            _ = self.eatComments()
 
         else:
-            print(isWhiteSpace(self.current_char))
             error_msg = 'Unknown token:' + self.current_char + \
                 ' on line ' + str(self.line_counter)
             self.reportError(error_msg)
@@ -215,34 +191,3 @@ class Scanner(Compiler):
             # Unknown token
 
         return token
-
-
-def checkEOF(char) -> bool:
-    return char == '\0'
-
-def isString(char) -> bool:
-    return char == '"'
-
-def isLetter(char) -> bool:
-    return char.isalpha()
-
-def isNum(char) -> bool:
-    return char.isnumeric()
-
-def isSpecialEqualToken(char) -> bool:
-    return char == '>' or char == '<' or char == '!' or char == ':' or char == '='
-
-def isSingleCharSymbol(char) -> bool:
-    return char in token_type.keys()
-
-def isSpecialArithOp(char) -> bool:
-    return char == '+' or char == '-'
-
-def isWhiteSpace(char) -> bool:
-    return char == '\t' or char == ' ' or char == '\r'
-
-def isComment(char) -> bool:
-    return char == '/'
-
-def isNewLine(char) -> bool:
-    return char == '\n'

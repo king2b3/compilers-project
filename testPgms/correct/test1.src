@@ -1,7 +1,11 @@
 /* ok so it's also time to test
 	/* nested comments; can you do it??
 	*/*/
-
+// test
+// test2
+/* */
+/* /* /* */ */ */
+//
 PROGRAM grant IS
     global variable JAKE : integer;
     global variable ryan : integer[3];

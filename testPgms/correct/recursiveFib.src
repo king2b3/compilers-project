@@ -21,7 +21,7 @@ procedure Fib : integer(variable val :integer)
 		ret := 0;
 		return ret;
 	end if;
-	if(val == 1) then
+	if(val == 1) then // testing
 		ret := 1;
 		return ret;
 	end if; // Remove line
@@ -42,6 +42,7 @@ for(i := 0; i < max)
     out := putInteger(x);
 	i := i + 1;
 end for;
+// another test
 
 end program.
 // test
