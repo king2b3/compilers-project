@@ -5,10 +5,9 @@
     Created by: Bayley King (https://github.com/king2b3)
 '''
 
-import pickle as pkl
-import csv
 from main import Compiler
-from tokens import token_type, reserved_words
+#from tokens import token_type, reserved_words, Token, ID, Keyword
+from tokens import *
 
 class Scanner(Compiler):
     ''' Scanner class. Holds methods to get tokens and scan/lex the input file. 
@@ -33,15 +32,17 @@ class Scanner(Compiler):
         '''
         if self.print_bool: print('Scanning file now....')
         token = self.getToken()
+        if token != None:
+            text = token.text
+            self.writeToken(token)
+        else:
+            text = ''
         self.writeToken(token)
-        while token != ('Keyword','EOF'): 
+        while text != 'EOF': 
             token = self.getToken()
             if token != None:
+                text = token.text
                 self.writeToken(token)
-        pkl.dump(self.pickle_scan,open(self.pickle_out_name,'wb'))
-        with open(self.text_out_name,"w") as f:
-            wr = csv.writer(f)
-            wr.writerows(self.pickle_scan)
         if self.print_bool: print('Scanning finished scanning. Scanned results written to file')
     
     def writeToken(self, token) -> None:
@@ -117,13 +118,14 @@ class Scanner(Compiler):
         
         self.eatWhiteSpace()
         self.eatComments()
-
+        
         while self.current_char == '/': # 
             self.nextChar()
             self.eatComments()
+            self.eatWhiteSpace()
 
         if self.current_char == '\0':
-            token = ('Keyword','EOF')        
+            token = Keyword('EOF')        
         
         elif self.current_char == '\n':
             self.line_counter += 1
@@ -134,10 +136,10 @@ class Scanner(Compiler):
             if self.peek() == '=':
                 last_char = self.current_char
                 self.nextChar()
-                token = (token_type[last_char + self.current_char],last_char+self.current_char)
+                token = Token(last_char+self.current_char)                
                 self.nextChar()
             else:
-                token = (token_type[self.current_char],self.current_char)
+                token = Token(self.current_char)
                 self.nextChar()
 
         elif self.current_char == '"':
@@ -148,10 +150,10 @@ class Scanner(Compiler):
             self.nextChar()
             token += self.current_char  
             self.nextChar()
-            token = ('Literal',token)
+            token = Literal(token)
         
         elif self.current_char in token_type.keys():
-            token = (token_type[self.current_char],self.current_char)
+            token = S_Token(self.current_char)
             self.nextChar()
         
         elif self.current_char.isalpha():
@@ -161,9 +163,9 @@ class Scanner(Compiler):
                 token += self.current_char
             token = token.lower()
             if token in reserved_words:
-                token = ('Keyword',token)  
+                token = Keyword(token)  
             else:
-                token = ('ID',token)
+                token = ID(token)
             self.nextChar()
             
         elif self.current_char.isnumeric():
@@ -178,17 +180,17 @@ class Scanner(Compiler):
                 if not self.peek().isnumeric():
                     # makes sure that there is at least one floating point after decimal
                     message = 'Illegal character in line number ' + str(self.line_counter +1)
-                    Compiler.reportError(message)
+                    Compiler.reportWarning(message)
                 while self.peek().isdigit():
                     self.nextChar()
                     token += self.current_char
-            token = ('ID',token)
+            token = ID(token)
             self.nextChar()
 
         else:
             error_msg = 'Unknown token:' + self.current_char + \
                 ' on line ' + str(self.line_counter)
-            self.reportError(error_msg)
+            self.reportWarning(error_msg)
             self.nextChar()
             # Unknown token
 

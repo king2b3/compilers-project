@@ -74,17 +74,36 @@ class Token(object):
 
         Not sure if it will turn abstract at some point
     '''
-    def __init__(self, val) -> None:
-        self.val = val
+    def __init__(self, text) -> None:
+        self.text = text
+
+    def __str__(self) -> str:
+        return self.text
+
+class S_Token(Token):
+    ''' Child class from Token for symbol tokens.
+    '''
+    def __init__(self, text) -> None:
+        super().__init__(text)
+        self.kind = token_type[text]
 
 class ID(Token):
     ''' Child class from Token for the ID token.
     '''
-    def __init__(self, val) -> None:
-        super.__init__(val)
+    def __init__(self, text) -> None:
+        super().__init__(text)
+        self.kind = 'ID'
 
 class Keyword(Token):
     ''' Child class from Token for the Keyword token.
     '''
-    def __init__(self, val) -> None:
-        super.__init__(val)
+    def __init__(self, text) -> None:
+        super().__init__(text)
+        self.kind = 'Keyword'
+
+class Literal(Token):
+    ''' Child class from Token for the Literal token.
+    '''
+    def __init__(self, text) -> None:
+        super().__init__(text)
+        self.kind = 'Literal'
