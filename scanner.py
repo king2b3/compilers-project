@@ -1,7 +1,8 @@
-'''
-    Scanner aspect of the parser project.
-    
-    Bayley King
+''' Holds the scanner structure for the front end of the compiler.
+
+    Created on: 1-15-2021
+    Version: Python 3.8.5
+    Created by: Bayley King (https://github.com/king2b3)
 '''
 
 import pickle as pkl
@@ -10,6 +11,8 @@ from main import Compiler
 from tokens import token_type, reserved_words
 
 class Scanner(Compiler):
+    ''' Scanner class. Holds methods to get tokens and scan/lex the input file. 
+    '''
     def __init__(self, filename, print_bool=False, error_file='error_log.txt') -> None:
         self.line_counter = 0
         self.error_file = error_file
@@ -125,7 +128,6 @@ class Scanner(Compiler):
         elif self.current_char == '\n':
             self.line_counter += 1
             self.nextChar()
-            #token = ('NewLine',None)            
 
         elif self.current_char == '>' or self.current_char == '<' or self.current_char == '!' \
                     or self.current_char == ':' or self.current_char == '=':

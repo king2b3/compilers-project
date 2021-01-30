@@ -5,10 +5,11 @@
     Created by: Bayley King (https://github.com/king2b3)
 '''
 
-from main import Compiler
+import abc
 
-class Parser(Compiler):
-    def __init__(
-        self
-    ) -> None:
-        
+
+class Syntax(abc.ABC):
+    def __init__(self) -> None:
+        ''' 
+        '''
+        pass

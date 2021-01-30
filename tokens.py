@@ -1,10 +1,12 @@
-'''
-    Definitions file for parser
+''' Definitions file for parser
     Reserved words as a list as well
 
     Token class can be called to check dictionary
-'''
 
+    Created on: 1-29-2021
+    Version: Python 3.8.5
+    Created by: Bayley King (https://github.com/king2b3)
+'''
 reserved_words = [
     'return',
     'end',
@@ -45,8 +47,6 @@ token_type = {
     # (Speech, Token_Type)
     '+': 'ArithOp',
     '-': 'ArithOp',
-    '++': 'ArithOp',
-    '--': 'ArithOp',
     '<': 'Relation',
     '<=': 'Relation',
     '>': 'Relation',
@@ -65,46 +65,26 @@ token_type = {
     '.': 'Period',
     '[': 'LeftBracket',
     ']': 'RightBracket',
-    '"': 'quote',
-    ',': 'comma'
+    '"': 'Quote',
+    ',': 'Comma'
 }
 
-# Make the attributes a dictionary? Then we could add whatever we would like to them.
-class SymbolTable(object):
-    def __init__(self, print_bool=False ) -> None:
-        self.table = {}
+class Token(object):
+    ''' Base token class. Parent class for ID and Keyword.
 
-    def allocate(self, symbol) -> object:
-        ''' Allocates a new empty symbol table
-        '''
-        self.table[symbol] = SymbolTable()
-    
-    def free(self) -> None:
-        ''' Removes all the entries of a table
-        '''
-        pass
-    
-    def lookup(self, name) -> object:
-        ''' Returns the reference to the symbol's class
-        '''
-        pass
-    
-    def insert(self, symbol, symbol_type) -> None:
-        ''' Adds a symbol to the table. If symbol is already in the table, pass.
-        '''
-        # checks if symbol is in the table 
-        if symbol in self.table:
-            pass
-        else:
-            self.table[symbol] = symbol_type
-    
-    def set_attribute(self, name, attr) -> None:
-        ''' Sets an attribute for a given entry
-        '''
-        pass
+        Not sure if it will turn abstract at some point
+    '''
+    def __init__(self, val) -> None:
+        self.val = val
 
-    def get_attribute(self, name) -> None:
-        ''' Returns an attribute. Just not sure what the type of an attribute is yet.
-        '''
-        pass
+class ID(Token):
+    ''' Child class from Token for the ID token.
+    '''
+    def __init__(self, val) -> None:
+        super.__init__(val)
 
+class Keyword(Token):
+    ''' Child class from Token for the Keyword token.
+    '''
+    def __init__(self, val) -> None:
+        super.__init__(val)

@@ -1,7 +1,8 @@
-'''
-    main file for compilers class project
-    Bayley King
-    Python 3
+''' Holds the syntax structure for the language.
+
+    Created on: 1-15-2021
+    Version: Python 3.8.5
+    Created by: Bayley King (https://github.com/king2b3)
 '''
 
 import argparse
