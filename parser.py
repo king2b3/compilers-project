@@ -264,3 +264,4 @@ class Parser(Compiler):
         ''' <string> ::=
                 "[^"]*"
         '''
+        pass
