@@ -57,13 +57,10 @@ class Compiler():
         self.error_status = None
         self.error_file = error_file
 
-        
-        #self.s = Scanner()
-
-
     def reportError(self, message) -> None:
         ''' Prints error to terminal, and writes errors to log
         '''
+        message = bcolors['FAIL'] + message + bcolors['ENDC']
         self.writeToErrorFile(message)
         print(message)
         self.error_status = True
@@ -71,6 +68,7 @@ class Compiler():
     def reportWarning(self, message) -> None:
         ''' Prints warnings to terminal, and writes warnings to log
         '''
+        message = bcolors['WARNING'] + message + bcolors['ENDC']
         self.writeToErrorFile(message)
         print(message)
 

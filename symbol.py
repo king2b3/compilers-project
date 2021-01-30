@@ -1,3 +1,10 @@
+''' Holds the symbol table structure for the language.
+
+    Created on: 1-29-2021
+    Version: Python 3.8.5
+    Created by: Bayley King (https://github.com/king2b3)
+'''
+
 # Make the attributes a dictionary? Then we could add whatever we would like to them.
 class SymbolTable(object):
     def __init__(self, print_bool=False ) -> None:

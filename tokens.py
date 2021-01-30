@@ -3,7 +3,7 @@
 
     Token class can be called to check dictionary
 
-    Created on: 1-29-2021
+    Created on: 1-15-2021
     Version: Python 3.8.5
     Created by: Bayley King (https://github.com/king2b3)
 '''
