@@ -1,4 +1,4 @@
-''' Holds the syntax structure for the language.
+''' Main file to call for the compilers project.
 
     Created on: 1-15-2021
     Version: Python 3.8.5
