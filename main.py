@@ -8,6 +8,7 @@
 import argparse
 import os
 import re
+from global_params import *
 #from scanner import Scanner
 
 
@@ -34,21 +35,6 @@ def parse_arguments(
             default=False, action="store_true")
     args = parser.parse_args(args=args)
     return args
-
-
-bcolors = {
-    'HEADER':'\033[95m',
-    'OKBLUE':'\033[94m',
-    'OKCYAN': '\033[96m',
-    'OKGREEN': '\033[92m',
-    'WARNING': '\033[93m',
-    'FAIL': '\033[91m',
-    'ENDC': '\033[0m',
-    'BOLD': '\033[1m',
-    'UNDERLINE': '\033[4m'
-}
-#print(f"{bcolors['WARNING']}Warning: No active frommets remain. Continue?{bcolors['ENDC']}")
-
 
 class Compiler():
     def __init__(self, filename, error_file='error_log.txt') -> None:

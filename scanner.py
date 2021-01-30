@@ -8,6 +8,7 @@
 from main import Compiler
 #from tokens import token_type, reserved_words, Token, ID, Keyword
 from tokens import *
+from global_params import *
 
 class Scanner(Compiler):
     ''' Scanner class. Holds methods to get tokens and scan/lex the input file. 
@@ -37,7 +38,7 @@ class Scanner(Compiler):
             self.writeToken(token)
         else:
             text = ''
-        self.writeToken(token)
+        #self.writeToken(token)
         while text != 'EOF': 
             token = self.getToken()
             if token != None:
@@ -46,13 +47,12 @@ class Scanner(Compiler):
         if self.print_bool: print('Scanning finished scanning. Scanned results written to file')
     
     def writeToken(self, token) -> None:
-        ''' Writes the token to a file, and appends it to a list to be used in pickle
-              Tokens can be printed too, based off of initial args parsed into the system
+        ''' Prints tokens, just for debug purposes.
         '''
         if self.print_bool: print(token)
     
     def nextChar(self) -> None:
-        ''' Moves onto the next character in the string
+        ''' Moves onto the next character in the input file
         '''
         self.current_pos += 1
         # make sure we don't look past the length of the string
@@ -62,7 +62,7 @@ class Scanner(Compiler):
             self.current_char = self.f[self.current_pos]
         
     def peek(self) -> str:
-        ''' Look at the next character in the line
+        ''' Look at the next character in the input file
         '''
 
         if self.current_pos + 1 >= len(self.f):
@@ -71,13 +71,13 @@ class Scanner(Compiler):
             return self.f[self.current_pos+1]
 
     def eatWhiteSpace(self) -> None:
-        ''' Eats all whitespace
+        ''' Eats all whitespace until next non-whitespace char is found
         '''
         while self.current_char == ' ' or self.current_char == '\t' or self.current_char == '\r':
             self.nextChar()
                 
     def eatComments(self, token=None) -> None:    
-        ''' Eats comments
+        ''' Eats comments until next non-comment char is found
         '''
         while self.current_char == '/' and (self.peek() == '*' or self.peek() == '/'):
             if self.peek() == '*': # multiline comment
@@ -111,8 +111,12 @@ class Scanner(Compiler):
                         self.line_counter += 1
                         comment_not_ended = False
     
-    def getToken(self) -> tuple:
-        ''' Gets the next token in a string
+    def getToken(self) -> "Token":
+        ''' Gets the next token in the input file.
+            Returns:
+              Some child of the token class if the token is a real value.
+              On some instances, type None can be returned.
+              Parser should check if returned token = None, if so call func again.
         '''
         token = None
         
@@ -150,7 +154,7 @@ class Scanner(Compiler):
             self.nextChar()
             token += self.current_char  
             self.nextChar()
-            token = Literal(token)
+            token = String(token)
         
         elif self.current_char in token_type.keys():
             token = S_Token(self.current_char)
@@ -179,7 +183,9 @@ class Scanner(Compiler):
                 token += self.current_char
                 if not self.peek().isnumeric():
                     # makes sure that there is at least one floating point after decimal
-                    message = 'Illegal character in line number ' + str(self.line_counter +1)
+                    message = (f"{bcolors['WARNING']}WARNING: Unknown character {bcolors['BOLD']}{self.current_char}{bcolors['ENDC']}"
+                            f"{bcolors['WARNING']}. Digit expected in float ")                            
+                            f"on line number {bcolors['UNDERLINE']}{self.line_counter + 1}{bcolors['ENDC']}")
                     Compiler.reportWarning(message)
                 while self.peek().isdigit():
                     self.nextChar()
@@ -188,9 +194,9 @@ class Scanner(Compiler):
             self.nextChar()
 
         else:
-            error_msg = 'Unknown token:' + self.current_char + \
-                ' on line ' + str(self.line_counter)
-            self.reportWarning(error_msg)
+            message = (f"{bcolors['WARNING']}WARNING: Unknown token {bcolors['BOLD']}{self.current_char}{bcolors['ENDC']}"
+                    f"{bcolors['WARNING']} on line number {bcolors['UNDERLINE']}{self.line_counter + 1}{bcolors['ENDC']}") 
+            self.reportWarning(message)
             self.nextChar()
             # Unknown token
 

@@ -101,8 +101,8 @@ class Keyword(Token):
         super().__init__(text)
         self.kind = 'Keyword'
 
-class Literal(Token):
-    ''' Child class from Token for the Literal token.
+class String(Token):
+    ''' Child class from Token for the String token.
     '''
     def __init__(self, text) -> None:
         super().__init__(text)
