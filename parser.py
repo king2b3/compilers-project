@@ -384,7 +384,6 @@ class Parser(Compiler):
         if self.print_bool: print("relation")
         if (self.checkPeek('<') or self.checkPeek('>') or self.checkPeek('>=') or
                 self.checkPeek('<=') or self.checkPeek("==") or self.checkPeek("!=")):
-            self.nextToken()
             self.relation()
             self.nextToken()
         self.term()
