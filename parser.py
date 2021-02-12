@@ -37,9 +37,9 @@ class Parser(Compiler):
         '''
         return check_token == self.next_token.text
 
-    def match(self, check_token) -> bool:
-        ''' Checks if the current token is the same as the expected token
-            Throws error is match fails
+    def matchToken(self, check_token) -> bool:
+        ''' Checks if the current token matches the expected token
+            Throws error if match fails
         '''
         if not self.checkToken(checkToken):
             message = (f"{bcolors['FAIL']}ERROR: Unexpected token {bcolors['BOLD']}{self.current_token}{bcolors['ENDC']}"
@@ -48,13 +48,29 @@ class Parser(Compiler):
             self.reportError(message)
         self.nextToken()
     
+    def checkType(self, check_token) -> bool:
+        ''' Checks if the current token type matches the expected type
+        '''
+        return check_token == self.current_token.kind
+
+    def matchType(self, check_token) -> bool:
+        ''' Checks if the token type is the expected type
+            Throws error if matchToken fails
+        '''
+        if not self.checkType(check_token):
+            message = (f"{bcolors['FAIL']}ERROR: Unexpected type {bcolors['BOLD']}{self.current_token.kind}{bcolors['ENDC']}"
+                    f"{bcolors['FAIL']} on line number {bcolors['UNDERLINE']}{s.line_counter + 1}{bcolors['ENDC']}"
+                    f"{bcolors['FAIL']}. type {check_token} expected.{bcolors['ENDC']}")) 
+        self.nextToken()
+
+
     ''' Parsing Statements '''
 
     def program(self) -> None:
         ''' <program> ::= 
                 <program_header><program_body>.
         '''
-        # self.match("program")
+        self.matchToken("program")
         if self.print_bool: print("program")
         # might not need to use a WHILE loop here
         while self.current_token.text != "EOF":
@@ -66,10 +82,10 @@ class Parser(Compiler):
                 program <identifier> : is
         '''
         if self.print_bool: print("program_header")
-        self.match("program")
+        self.matchToken("program")
         self.identifier()
-        self.match(":")
-        self.match("is")
+        self.matchToken(":")
+        self.matchToken("is")
 
     def program_body(self) -> None:
         ''' <program_body> ::= 
@@ -81,13 +97,13 @@ class Parser(Compiler):
         if self.print_bool: print("program_body")
         while not self.checkToken("begin"):
             self.decleration()
-            self.match(";")
-        self.match("begin")
+            self.matchToken(";")
+        self.matchToken("begin")
         while not self.checkToken("end"):
             self.statement()
-            self.match(";")
-        self.match("end")
-        self.match("program")
+            self.matchToken(";")
+        self.matchToken("end")
+        self.matchToken("program")
     
     def decleration(self) -> None:
         ''' <decleration> ::=
@@ -114,20 +130,19 @@ class Parser(Compiler):
         self.procedure_decleration()
         self.procedure_body()
 
-
     def procedure_header(self) -> None:
         ''' <procedure_header> ::=
                 procedure <identifier> : <type_mark> ( [<parameter_list>] )
         '''
         if self.print_bool: print("procedure header")
-        self.match("procedure")
+        self.matchToken("procedure")
         self.identifier()
-        self.match(":")
+        self.matchToken(":")
         self.type_mark()
-        self.match("(")
+        self.matchToken("(")
         if not self.checkToken(")"):
             self.parameter_list()
-        self.match(")")
+        self.matchToken(")")
     
     def parameter_list(self) -> None:
         ''' <parameter_list> ::=
@@ -157,21 +172,21 @@ class Parser(Compiler):
         if self.print_bool: print("procedure body")
         while not self.checkToken("begin"):
             self.decleration()
-            self.match(";")
+            self.matchToken(";")
         self.nextToken()
         while not self.checkToken("end")
             self.statement()
-        self.match("end")
-        self.match("procedure")
+        self.matchToken("end")
+        self.matchToken("procedure")
 
     def variable_decleration(self) -> None:
         ''' <variable_decleration> ::=
                 variable <identifier> : <type_mark> [[<bound>]]
         '''
         if self.print_bool: print("variable decleration")
-        self.match("variable")
+        self.matchToken("variable")
         self.identifier()
-        self.match(":")
+        self.matchToken(":")
         self.type_mark()
         if self.checkToken("["):
             self.nextToken()
@@ -183,9 +198,9 @@ class Parser(Compiler):
                 type <identifier> is <type_mark>
         '''
         if self.print_bool: print("type decleration")
-        self.match("type")
+        self.matchToken("type")
         self.identifier()
-        self.match("is")
+        self.matchToken("is")
         self.type_mark()
     
     def type_mark(self) -> None:
@@ -200,12 +215,12 @@ class Parser(Compiler):
             self.nextToken()
         elif checkToken("enum"):
             self.nextToken()
-            self.match("{")
+            self.matchToken("{")
             self.identifier()
             while self.checkToken(","):
                 self.nextToken()
                 self.identifier()
-            self.match("}")
+            self.matchToken("}")
         else:
             self.identifier()
     
@@ -224,7 +239,14 @@ class Parser(Compiler):
                 | <return_statement>
         '''
         if self.print_bool: print("statement")
-        # do something here
+        if self.checkToken("return"):
+            self.return_statement()
+        elif self.checkToken("for"):
+            self.loop_statement()
+        elif self.checkToken("if"):
+            self.if_statement()
+        else:
+            self.assignment_statement()
 
     def procedure_call(self) -> None:
         ''' <procedure_call> ::=
@@ -232,10 +254,10 @@ class Parser(Compiler):
         '''
         if self.print_bool: print("procedure call")
         self.identifier()
-        self.match("(")
+        self.matchToken("(")
         if not self.checkToken(")"):
             self.argument_list()
-        self.match(")")
+        self.matchToken(")")
     
     def assignment_statement(self) -> None:
         ''' <assignment_statement> ::=
@@ -243,7 +265,7 @@ class Parser(Compiler):
         '''
         if self.print_bool: print("assignment statement")
         self.destination()
-        self.match(":=")
+        self.matchToken(":=")
         self.expression()
     
     def destination(self) -> None:
@@ -264,24 +286,24 @@ class Parser(Compiler):
                 end if
         '''
         if self.print_bool: print("if")
-        self.match("if")
-        self.match("(")
+        self.matchToken("if")
+        self.matchToken("(")
         self.expression()
-        self.match(")")
-        self.match("then")
-        self.match("(")
+        self.matchToken(")")
+        self.matchToken("then")
+        self.matchToken("(")
         while self.checkToken(")"):
             self.statement()
-            self.match(";")
+            self.matchToken(";")
         self.nextToken()
         if self.checkToken("else"):
             self.nextToken()
             while self.checkToken(")"):
                 self.statement()
-                self.match(";")
+                self.matchToken(";")
             self.nextToken()
-        self.match("end")
-        self.match("if")        
+        self.matchToken("end")
+        self.matchToken("if")        
 
     def loop_statement(self) -> None:
         ''' <loop_statement> ::=
@@ -290,24 +312,24 @@ class Parser(Compiler):
                 end for
         '''
         if self.print_bool: print("for")
-        self.match("for")
-        self.match("(")
+        self.matchToken("for")
+        self.matchToken("(")
         self.assignment_statement()
-        self.match(";")
+        self.matchToken(";")
         self.expression()
         self.(")")
         while not self.checkToken("end"):
             self.statement()
-            self.match(";")
+            self.matchToken(";")
         self.nextToken()
-        self.match("for")
+        self.matchToken("for")
     
     def return_statement(self) -> None:
         ''' <return_statement> ::=
                 return <expression>
         '''
         if self.print_bool: print("return")
-        self.match("return")
+        self.matchToken("return")
         self.expression()
 
     def identifier(self) -> None:
@@ -315,8 +337,8 @@ class Parser(Compiler):
                 [a-zA-Z] [a-zA-Z0-9_]*
         '''
         if self.print_bool: print("identifier")
-        # do something with table here
-    
+        self.matchType("ID")
+
     def expression(self) -> None:
         ''' <expression> ::=
                   <expression> & <arithOp>
@@ -383,8 +405,29 @@ class Parser(Compiler):
                 | false
         '''
         if self.print_bool: print("factor")
-        # do something here
-
+        if self.checkToken("("):
+            self.nextToken()
+            self.expression()
+            self.match(")")
+        elif self.checkType("ID"):
+            if self.checkPeek("("):
+                self.procedure_call()
+            elif self.checkPeek("["):
+                self.name()
+            else:
+                self.number()
+        elif self.checkToken("-"):
+            self.nextToken()
+            if self.checkPeek("["):
+                self.name()
+            else:
+                self.number()
+        elif self.checkType("literal"):
+            self.string()
+        elif self.checkToken("false"):
+            self.nextToken()        
+        else:
+            self.matchToken("true"):
 
     def name(self) -> None:
         ''' <name> ::=
@@ -392,10 +435,10 @@ class Parser(Compiler):
         '''
         if self.print_bool: print("name")
         self.identifier()
-        self.match("[")
+        self.matchToken("[")
         if not self.checkToken("]")
             self.expression()
-        self.match("]")
+        self.matchToken("]")
 
     def argument_list(self) -> None:
         ''' <argument_list> ::=
@@ -413,13 +456,13 @@ class Parser(Compiler):
                 [0-9][0-9_]*[.[0-9_]*]
         '''
         if self.print_bool: print("number")
-        # do something here
+        self.matchType("ID")
 
     def string(self) -> None:
         ''' <string> ::=
                 "[^"]*"
         '''
         if self.print_bool: print("string")
-        # do something here
+        self.matchType("Literal")
     
     ''' End of Parsing Statements '''
