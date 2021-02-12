@@ -9,6 +9,7 @@ import argparse
 import os
 import re
 from global_params import *
+import sys
 #from scanner import Scanner
 
 
@@ -29,7 +30,11 @@ def parse_arguments(
     parser.add_argument("input_file", help="Path to the input file.")
     parser.add_argument("-o", "--output_file", help="Path to the output file.",
             default="output")
-    parser.add_argument("-p", "--Print", help="Prints out EVERYTHING",
+    parser.add_argument("-p", "--print_all", help="Prints out EVERYTHING",
+            default=False, action="store_true")
+    parser.add_argument("-ps", "--print_scan", help="Prints out the scan",
+            default=False, action="store_true")
+    parser.add_argument("-pp", "--print_parse", help="Prints out the parsing",
             default=False, action="store_true")
     parser.add_argument("-n", "--name", help="Prints file name",
             default=False, action="store_true")
@@ -48,7 +53,7 @@ class Compiler():
         '''
         message = bcolors['FAIL'] + message + bcolors['ENDC']
         self.writeToErrorFile(message)
-        print(message)
+        sys.exit(message)
         self.error_status = True
     
     def reportWarning(self, message) -> None:
@@ -67,7 +72,8 @@ class Compiler():
         ef.close()
 
 
-def main(input_file, quiet=False, output_file="output", Print=False, name=False) -> None:
+def main(input_file, quiet=False, output_file="output", print_all=False, name=False,
+                print_scan=False, print_parse=False) -> None:
     """Main function.
 
     Parameters
@@ -78,6 +84,12 @@ def main(input_file, quiet=False, output_file="output", Print=False, name=False)
         Path to the output file. Default is 'output'
     quiet: bool
         Rather non-errors should be printed. Default is False
+    print_parse: bool:
+        Prints out the recursive calls of the parser. Default is False
+    print_scan: bool:
+        Prints out the scanned tokens. Default is False
+    print_all: bool:
+        Prints out everything. Default is False
     Returns
     -------
     int
@@ -102,9 +114,11 @@ def main(input_file, quiet=False, output_file="output", Print=False, name=False)
         print(input_file)
         print('#######################')
     c = Compiler(input_file)
-    s = Scanner(input_file,Print)
+    s = Scanner(input_file,print_scan)
+    p = Parser(input_file,print_parse)
     compiler_timer.start_timer()
-    s.scanFile()
+    # s.scanFile()
+    p.parse()
     compiler_timer.end_timer()
     print(compiler_timer.__str__())
 

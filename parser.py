@@ -63,6 +63,8 @@ class Parser(Compiler):
                     f"{bcolors['FAIL']}. type {check_token} expected.{bcolors['ENDC']}")) 
         self.nextToken()
 
+    def parse(self):
+        self.program()
 
     ''' Parsing Statements '''
 
@@ -70,8 +72,8 @@ class Parser(Compiler):
         ''' <program> ::= 
                 <program_header><program_body>.
         '''
-        self.matchToken("program")
         if self.print_bool: print("program")
+        self.matchToken("program")
         # might not need to use a WHILE loop here
         while self.current_token.text != "EOF":
             self.program_header()
