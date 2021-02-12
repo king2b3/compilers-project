@@ -32,18 +32,10 @@ class Scanner(Compiler):
         ''' Scans file and writes tokens to text and pickle file
         '''
         if self.print_bool: print('Scanning file now....')
-        token = self.getToken()
-        if token != None:
-            text = token.text
-            self.writeToken(token)
-        else:
-            text = ''
-        #self.writeToken(token)
-        while text != 'EOF': 
+        token = Null()
+        while token.text != 'EOF': 
             token = self.getToken()
-            if token != None:
-                text = token.text
-                self.writeToken(token)
+            self.writeToken(token)
         if self.print_bool: print('Scanning finished scanning. Scanned results written to file')
     
     def writeToken(self, token) -> None:
@@ -118,15 +110,15 @@ class Scanner(Compiler):
               On some instances, type None can be returned.
               Parser should check if returned token = None, if so call func again.
         '''
-        token = None
+        token = Null()
         
         self.eatWhiteSpace()
         self.eatComments()
         
-        while self.current_char == '/': # 
-            self.nextChar()
-            self.eatComments()
-            self.eatWhiteSpace()
+        #while self.current_char == '/':
+        #    self.nextChar()
+        #    self.eatComments()
+        #    self.eatWhiteSpace()
 
         if self.current_char == '\0':
             token = Keyword('EOF')        
@@ -134,6 +126,7 @@ class Scanner(Compiler):
         elif self.current_char == '\n':
             self.line_counter += 1
             self.nextChar()
+            token = self.getToken()
 
         elif self.current_char == '>' or self.current_char == '<' or self.current_char == '!' \
                     or self.current_char == ':' or self.current_char == '=':
@@ -184,7 +177,7 @@ class Scanner(Compiler):
                 if not self.peek().isnumeric():
                     # makes sure that there is at least one floating point after decimal
                     message = (f"{bcolors['WARNING']}WARNING: Unknown character {bcolors['BOLD']}{self.current_char}{bcolors['ENDC']}"
-                            f"{bcolors['WARNING']}. Digit expected in float ")                            
+                            f"{bcolors['WARNING']}. Digit expected in float "
                             f"on line number {bcolors['UNDERLINE']}{self.line_counter + 1}{bcolors['ENDC']}")
                     Compiler.reportWarning(message)
                 while self.peek().isdigit():
@@ -199,5 +192,16 @@ class Scanner(Compiler):
             self.reportWarning(message)
             self.nextChar()
             # Unknown token
-
+        
+        self.writeToken(token)
         return token
+
+def main(input_file='compiler_theory_test_programs/correct/math.src'):
+    from os import system
+    system("clear")
+    s = Scanner(input_file,True)
+    print(s.f)
+    s.scanFile()
+
+if __name__ == "__main__":
+    main()

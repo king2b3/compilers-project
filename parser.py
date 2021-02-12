@@ -13,10 +13,13 @@ from global_params import *
 class Parser(Compiler):
     ''' Class for the parser. Contains methods needed for parse, and calls the scanner.
     '''    
-    def __init__(self, filename, print_bool=False, error_file='error_log.txt') -> None:
+    def __init__(self, filename, sprint_bool=False,print_bool=False, error_file='error_log.txt') -> None:
         self.s = Scanner(filename)
         self.current_token = None
         self.next_token = None
+        self.print_bool = print_bool
+        self.error_file = error_file
+        self.sprint_bool = sprint_bool
 
         while self.current_token == None:
             self.nextToken()
@@ -25,7 +28,10 @@ class Parser(Compiler):
         ''' Gets the next token for current and next self variables
         '''
         self.current_token = self.next_token
-        self.next_token = s.getToken()
+        if self.sprint_bool: print("TOKEN: ",self.current_token)
+        self.next_token = self.s.getToken()
+        #while self.current_token.text != None:
+        #    self.nextToken()
     
     def checkToken(self, check_token) -> bool:
         ''' Checks if the current token is the same as the expected token
@@ -41,10 +47,10 @@ class Parser(Compiler):
         ''' Checks if the current token matches the expected token
             Throws error if match fails
         '''
-        if not self.checkToken(checkToken):
-            message = (f"{bcolors['FAIL']}ERROR: Unexpected token {bcolors['BOLD']}{self.current_token}{bcolors['ENDC']}"
-                    f"{bcolors['FAIL']} on line number {bcolors['UNDERLINE']}{s.line_counter + 1}{bcolors['ENDC']}"
-                    f"{bcolors['FAIL']}. {check_token} expected.{bcolors['ENDC']}"))           
+        if not self.checkToken(check_token):
+            message = (f"{bcolors['FAIL']}ERROR: Unexpected token '{bcolors['BOLD']}{self.current_token}{bcolors['ENDC']}"
+                    f"{bcolors['FAIL']}' on line number {bcolors['UNDERLINE']}{self.s.line_counter + 1}{bcolors['ENDC']}"
+                    f"{bcolors['FAIL']}. '{check_token}' expected.{bcolors['ENDC']}")
             self.reportError(message)
         self.nextToken()
     
@@ -59,8 +65,8 @@ class Parser(Compiler):
         '''
         if not self.checkType(check_token):
             message = (f"{bcolors['FAIL']}ERROR: Unexpected type {bcolors['BOLD']}{self.current_token.kind}{bcolors['ENDC']}"
-                    f"{bcolors['FAIL']} on line number {bcolors['UNDERLINE']}{s.line_counter + 1}{bcolors['ENDC']}"
-                    f"{bcolors['FAIL']}. type {check_token} expected.{bcolors['ENDC']}")) 
+                    f"{bcolors['FAIL']} on line number {bcolors['UNDERLINE']}{self.s.line_counter + 1}{bcolors['ENDC']}"
+                    f"{bcolors['FAIL']}. type {check_token} expected.{bcolors['ENDC']}")
         self.nextToken()
 
     def parse(self):
@@ -73,7 +79,6 @@ class Parser(Compiler):
                 <program_header><program_body>.
         '''
         if self.print_bool: print("program")
-        self.matchToken("program")
         # might not need to use a WHILE loop here
         while self.current_token.text != "EOF":
             self.program_header()
@@ -81,12 +86,11 @@ class Parser(Compiler):
 
     def program_header(self) -> None:
         ''' <program_header> ::= 
-                program <identifier> : is
+                program <identifier> is
         '''
         if self.print_bool: print("program_header")
         self.matchToken("program")
         self.identifier()
-        self.matchToken(":")
         self.matchToken("is")
 
     def program_body(self) -> None:
@@ -114,12 +118,12 @@ class Parser(Compiler):
                 | [global] <type_decleration>
         '''
         if self.print_bool: print("decleration")
-        if checkToken("global"):
+        if self.checkToken("global"):
             if print_bool: print("global")
             self.nextToken()
-        if checkToken("procedure"):
+        if self.checkToken("procedure"):
             self.procedure_decleration()
-        elif checkToken("variable"):
+        elif self.checkToken("variable"):
             self.variable_decleration()
         else:
             self.type_decleration()
@@ -129,7 +133,7 @@ class Parser(Compiler):
                 <procedure_header><procedure_body>
         '''
         if self.print_bool: print("procedure decleration")
-        self.procedure_decleration()
+        self.procedure_header()
         self.procedure_body()
 
     def procedure_header(self) -> None:
@@ -176,7 +180,7 @@ class Parser(Compiler):
             self.decleration()
             self.matchToken(";")
         self.nextToken()
-        while not self.checkToken("end")
+        while not self.checkToken("end"):
             self.statement()
         self.matchToken("end")
         self.matchToken("procedure")
@@ -212,8 +216,8 @@ class Parser(Compiler):
                 | enum {<identifier> ( , <identifier> )* }
         '''
         if self.print_bool: print("type mark")
-        if checkToken("integer") or checkToken("float") or checkToken("string") 
-                or checkToken("bool"):
+        if (self.checkToken("integer") or self.checkToken("float") or self.checkToken("string") or
+                self.checkToken("bool")):
             self.nextToken()
         elif checkToken("enum"):
             self.nextToken()
@@ -319,7 +323,7 @@ class Parser(Compiler):
         self.assignment_statement()
         self.matchToken(";")
         self.expression()
-        self.(")")
+        self.match(")")
         while not self.checkToken("end"):
             self.statement()
             self.matchToken(";")
@@ -378,8 +382,9 @@ class Parser(Compiler):
                 | <term>
         '''
         if self.print_bool: print("relation")
-        if self.checkPeek('<') or self.checkPeek('>') or self.checkPeek('>=') or
-                self.checkPeek('<=') or self.checkPeek(==) or self.checkPeek("!="):
+        if (self.checkPeek('<') or self.checkPeek('>') or self.checkPeek('>=') or
+                self.checkPeek('<=') or self.checkPeek("==") or self.checkPeek("!=")):
+            self.nextToken()
             self.relation()
             self.nextToken()
         self.term()
@@ -429,7 +434,7 @@ class Parser(Compiler):
         elif self.checkToken("false"):
             self.nextToken()        
         else:
-            self.matchToken("true"):
+            self.matchToken("true")
 
     def name(self) -> None:
         ''' <name> ::=
@@ -438,7 +443,7 @@ class Parser(Compiler):
         if self.print_bool: print("name")
         self.identifier()
         self.matchToken("[")
-        if not self.checkToken("]")
+        if not self.checkToken("]"):
             self.expression()
         self.matchToken("]")
 

@@ -101,7 +101,10 @@ def main(input_file, quiet=False, output_file="output", print_all=False, name=Fa
     """
     #from timer import Timer
     from scanner import Scanner
+    from parser import Parser
     from timer import Timer
+    from os import system
+    system("clear")
 
     compiler_timer = Timer()
     
@@ -113,11 +116,8 @@ def main(input_file, quiet=False, output_file="output", print_all=False, name=Fa
         print('#######################')
         print(input_file)
         print('#######################')
-    c = Compiler(input_file)
-    s = Scanner(input_file,print_scan)
-    p = Parser(input_file,print_parse)
     compiler_timer.start_timer()
-    # s.scanFile()
+    p = Parser(input_file,print_bool=print_parse,sprint_bool=print_scan)
     p.parse()
     compiler_timer.end_timer()
     print(compiler_timer.__str__())
