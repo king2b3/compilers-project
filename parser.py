@@ -15,20 +15,21 @@ class Parser(Compiler):
     '''    
     def __init__(self, filename, sprint_bool=False,print_bool=False, error_file='error_log.txt') -> None:
         self.s = Scanner(filename)
-        self.current_token = None
-        self.next_token = None
+        self.current_token = Null()
+        self.next_token = Null()
         self.print_bool = print_bool
         self.error_file = error_file
         self.sprint_bool = sprint_bool
 
-        while self.current_token == None:
-            self.nextToken()
+        #while self.current_token == None:
+        self.nextToken()
+        self.nextToken()
 
     def nextToken(self) -> None:
         ''' Gets the next token for current and next self variables
         '''
         self.current_token = self.next_token
-        if self.sprint_bool: print("TOKEN: ",self.current_token)
+        if self.sprint_bool: print("TOKEN: ",self.current_token,self.current_token.kind)
         self.next_token = self.s.getToken()
         #while self.current_token.text != None:
         #    self.nextToken()
@@ -72,6 +73,8 @@ class Parser(Compiler):
     def parse(self):
         self.program()
 
+    ########################################################################
+
     ''' Parsing Statements '''
 
     def program(self) -> None:
@@ -97,7 +100,7 @@ class Parser(Compiler):
         ''' <program_body> ::= 
                         ( <decleration> ; )*
                     begin
-                        ( <statement> : )*
+                        ( <statement> ; )*
                     end program
         '''
         if self.print_bool: print("program_body")
@@ -110,6 +113,7 @@ class Parser(Compiler):
             self.matchToken(";")
         self.matchToken("end")
         self.matchToken("program")
+        self.matchToken(".")
     
     def decleration(self) -> None:
         ''' <decleration> ::=
@@ -119,7 +123,7 @@ class Parser(Compiler):
         '''
         if self.print_bool: print("decleration")
         if self.checkToken("global"):
-            if print_bool: print("global")
+            if self.print_bool: print("global")
             self.nextToken()
         if self.checkToken("procedure"):
             self.procedure_decleration()
@@ -170,9 +174,9 @@ class Parser(Compiler):
     
     def procedure_body(self) -> None:
         ''' <procedure_body> ::=
-                    ( <decleration> ; )*
+                    (<decleration> ;)*
                 begin
-                    (<statement>)*
+                    (<statement> ;)*
                 end procedure
         '''
         if self.print_bool: print("procedure body")
@@ -182,6 +186,7 @@ class Parser(Compiler):
         self.nextToken()
         while not self.checkToken("end"):
             self.statement()
+            self.matchToken(";")
         self.matchToken("end")
         self.matchToken("procedure")
 
@@ -197,7 +202,7 @@ class Parser(Compiler):
         if self.checkToken("["):
             self.nextToken()
             self.bound()
-            self.checkToken("]")
+            self.matchToken("]")
         
     def type_decleration(self) -> None:
         ''' <type_decleration> ::=
@@ -283,7 +288,7 @@ class Parser(Compiler):
         if self.checkToken("["):
             self.nextToken()
             self.expression()
-            self.checkToken("]")
+            self.matchToken("]")
     
     def if_statement(self) -> None:
         ''' <if_statement> ::=
@@ -297,17 +302,14 @@ class Parser(Compiler):
         self.expression()
         self.matchToken(")")
         self.matchToken("then")
-        self.matchToken("(")
-        while self.checkToken(")"):
+        while not self.checkToken("else") and not self.checkToken("end"):
             self.statement()
             self.matchToken(";")
-        self.nextToken()
         if self.checkToken("else"):
             self.nextToken()
-            while self.checkToken(")"):
+            while not self.checkToken("end"):
                 self.statement()
                 self.matchToken(";")
-            self.nextToken()
         self.matchToken("end")
         self.matchToken("if")        
 
@@ -323,7 +325,7 @@ class Parser(Compiler):
         self.assignment_statement()
         self.matchToken(";")
         self.expression()
-        self.match(")")
+        self.matchToken(")")
         while not self.checkToken("end"):
             self.statement()
             self.matchToken(";")
@@ -346,33 +348,67 @@ class Parser(Compiler):
         self.matchType("ID")
 
     def expression(self) -> None:
-        ''' <expression> ::=
+        ''' **OLD GRAMMER**
+            <expression> ::=
                   <expression> & <arithOp>
                 | <expression> | <arithOp>
                 | [not] <arithOp>
+            
+            **NEW GRAMMER**
+            <expression> ::=
+                [not] <arithOp> <expression_prime>
         '''
         if self.print_bool: print("expression")
-        if self.checkPeek("&") or self.checkPeek("|"):
-            self.expression()
-            self.nextToken()
-        elif self.checkToken("not"):
+        if self.checkToken("not"):
             self.nextToken()
         self.arithOp()
+        self.expression_prime()
+    
+    def expression_prime(self) -> None:
+        ''' <expression_prime> ::=
+                  & [not] <arithOp> <expression_prime>
+                | | [not] <arithOp> <expression_prime>
+                | None
+        '''
+        if self.checkToken("&") or self.checkToken("|"):
+            self.nextToken()
+            if self.checkToken("not"):
+                self.nextToken()
+            self.arithOp()
+            self.expression_prime()
+        else:
+            pass        
 
     def arithOp(self) -> None:
-        ''' <arithOp> ::=
+        ''' **OLD GRAMMER** 
+            <arithOp> ::=
                   <arithOp> + <relation>
                 | <arithOp> - <relation>
                 | <relation>
+            **NEW GRAMMER**
+            <arithOp> ::=
+                <relation> <arithOp_prime>
         '''
         if self.print_bool: print("artih op")
-        if self.checkPeek("+") or self.checkPeek("-"):
-            self.arithOp()
-            self.nextToken()
         self.relation()
+        self.arithOp_prime()
+
+    def arithOp_prime(self) -> None:
+        ''' <arithOp_prime> ::=
+                  + <relation> <arithOp_prime>
+                | - <relation> <arithOp_prime>
+                | None
+        '''
+        if self.checkToken("+") or self.checkToken("-"):
+            self.nextToken()
+            self.relation()
+            self.arithOp_prime()
+        else:
+            pass
     
     def relation(self) -> None:
-        ''' <relation> ::=
+        ''' **OLD GRAMMER**
+            <relation> ::=
                   <relation> < <term>
                 | <relation> > <term>
                 | <relation> >= <term>
@@ -380,25 +416,66 @@ class Parser(Compiler):
                 | <relation> == <term>
                 | <relation> != <term>
                 | <term>
+        
+            A = Aa | Ab | Ac | Ad | Ae | Af | y
+
+            **NEW GRAMMER TO ELIM LR**
+            A = yA'
+            A' = aA' | bA' | cA' | dA' | eA' | fA' | /0
+
+            <relation> ::= 
+                <term> <relation_prime>
+
         '''
         if self.print_bool: print("relation")
-        if (self.checkPeek('<') or self.checkPeek('>') or self.checkPeek('>=') or
-                self.checkPeek('<=') or self.checkPeek("==") or self.checkPeek("!=")):
-            self.relation()
-            self.nextToken()
         self.term()
+        self.relation_prime()
+
+    def relation_prime(self) -> None:
+        ''' <relation_prime> ::=
+                  < <term> <relation_prime> 
+                | > <term> <relation_prime> 
+                | >= <term> <relation_prime> 
+                | <= <term> <relation_prime> 
+                | == <term> <relation_prime> 
+                | != <term> <relation_prime> 
+                | None
+        '''
+        if (self.checkToken("<") or self.checkToken(">") or self.checkToken(">=") 
+                or self.checkToken("<=") or self.checkToken("==") or self.checkToken("!=")):
+            self.nextToken()
+            self.term()
+            self.relation_prime()
+        else:
+            pass
 
     def term(self) -> None:
-        ''' <term> ::=
+        ''' **OLD GRAMMER**
+            <term> ::=
                   <term> * <factor>
                 | <term> / <factor>
                 | <factor>
+            
+            **NEW GRAMMER**
+            <term> ::=
+                <factor> <term_prime>
         '''
         if self.print_bool: print("term")
-        if self.checkPeek("*") or self.checkPeek("/"):
-            self.term()
-            self.nextToken()
         self.factor()
+        self.term_prime()
+    
+    def term_prime(self) -> None:
+        ''' <term_prime> ::=
+                  * <factor> <term_prime>
+                | / <factor> <term_prime>
+                | None
+        '''
+        if self.checkToken("*") or self.checkToken("/"):
+            self.nextToken()
+            self.factor()
+            self.term_prime()
+        else:
+            pass
 
     def factor(self) -> None:
         ''' <factor> ::=
@@ -411,24 +488,26 @@ class Parser(Compiler):
                 | false
         '''
         if self.print_bool: print("factor")
+        
         if self.checkToken("("):
             self.nextToken()
             self.expression()
-            self.match(")")
-        elif self.checkType("ID"):
+            self.matchToken(")")
+        elif self.checkType("ID") or self.checkType("Keyword"):
             if self.checkPeek("("):
                 self.procedure_call()
-            elif self.checkPeek("["):
-                self.name()
-            else:
+            # check for name
+            elif self.current_token.text.isnumeric():
                 self.number()
+            else:
+                self.name()
         elif self.checkToken("-"):
             self.nextToken()
-            if self.checkPeek("["):
-                self.name()
-            else:
+            if self.current_token.text.isnumeric():
                 self.number()
-        elif self.checkType("literal"):
+            else:
+                self.name()
+        elif self.checkType("Literal"):
             self.string()
         elif self.checkToken("false"):
             self.nextToken()        
@@ -441,10 +520,10 @@ class Parser(Compiler):
         '''
         if self.print_bool: print("name")
         self.identifier()
-        self.matchToken("[")
-        if not self.checkToken("]"):
+        if self.checkToken("["):
+            self.nextToken()
             self.expression()
-        self.matchToken("]")
+            self.matchToken("]")
 
     def argument_list(self) -> None:
         ''' <argument_list> ::=

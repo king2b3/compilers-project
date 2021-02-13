@@ -72,7 +72,8 @@ class Scanner(Compiler):
         ''' Eats comments until next non-comment char is found
         '''
         while self.current_char == '/' and (self.peek() == '*' or self.peek() == '/'):
-            if self.peek() == '*': # multiline comment
+            # multiline comment
+            if self.peek() == '*': 
                 self.nextChar()
                 comment_not_ended = True
                 num_blocks = 1
@@ -86,6 +87,7 @@ class Scanner(Compiler):
                         comment_not_ended = False 
                         num_blocks = 0
                     if self.current_char == '*' and self.peek() == '/':
+                        self.nextChar()
                         self.nextChar()
                         num_blocks -= 1
                         comment_not_ended = False
@@ -112,8 +114,10 @@ class Scanner(Compiler):
         '''
         token = Null()
         
-        self.eatWhiteSpace()
-        self.eatComments()
+        while ((self.current_char == '/' and (self.peek() == '*' or self.peek() == '/')) or
+                self.current_char == ' ' or self.current_char == '\t' or self.current_char == '\r'):
+            self.eatWhiteSpace()
+            self.eatComments()
         
         #while self.current_char == '/':
         #    self.nextChar()
@@ -193,14 +197,14 @@ class Scanner(Compiler):
             self.nextChar()
             # Unknown token
         
-        self.writeToken(token)
+        #self.writeToken(token)
         return token
 
-def main(input_file='compiler_theory_test_programs/correct/math.src'):
+def main(input_file='compiler_theory_test_programs/correct/source.src'):
     from os import system
     system("clear")
     s = Scanner(input_file,True)
-    print(s.f)
+    #print(s.f)
     s.scanFile()
 
 if __name__ == "__main__":

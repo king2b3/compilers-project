@@ -38,6 +38,8 @@ def parse_arguments(
             default=False, action="store_true")
     parser.add_argument("-n", "--name", help="Prints file name",
             default=False, action="store_true")
+    parser.add_argument("-c", "--clear", help="clears the screen",
+            default=False, action="store_true")
     args = parser.parse_args(args=args)
     return args
 
@@ -73,7 +75,7 @@ class Compiler():
 
 
 def main(input_file, quiet=False, output_file="output", print_all=False, name=False,
-                print_scan=False, print_parse=False) -> None:
+                print_scan=False, print_parse=False, clear=False) -> None:
     """Main function.
 
     Parameters
@@ -104,7 +106,7 @@ def main(input_file, quiet=False, output_file="output", print_all=False, name=Fa
     from parser import Parser
     from timer import Timer
     from os import system
-    system("clear")
+    if clear: system("clear")
 
     compiler_timer = Timer()
     
