@@ -76,7 +76,7 @@ class Token(object):
     '''
     def __init__(self, text) -> None:
         self.text = text
-        self.kind = None
+        self.kind = "None"
 
     def __str__(self) -> str:
         return self.text
@@ -114,3 +114,4 @@ class Null(Token):
     '''
     def __init__(self) -> None:
         super().__init__('None')
+        self.kind = 'None'
