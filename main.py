@@ -1,9 +1,9 @@
-''' Main file to call for the compilers project.
+""" Main file to call for the compilers project.
 
     Created on: 1-15-2021
     Version: Python 3.8.5
     Created by: Bayley King (https://github.com/king2b3)
-'''
+"""
 
 import argparse
 import os
@@ -16,13 +16,12 @@ import sys
 def parse_arguments(
     args=None
 ) -> None:
-    """Returns the parsed arguments.
+    """ Returns the parsed arguments.
 
-    Parameters
-    ----------
-    args: List of strings to be parsed by argparse.
-        The default None results in argparse using the values passed into
-        sys.args.
+        Parameters
+        ----------
+        args: List of strings to be parsed by argparse.
+          The default None results in argparse using the values passed into sys.args.
     """
     parser = argparse.ArgumentParser(
             description="A default template for python",
@@ -51,24 +50,21 @@ class Compiler():
         self.error_file = error_file
 
     def reportError(self, message) -> None:
-        ''' Prints error to terminal, and writes errors to log
-        '''
+        """ Prints error to terminal, and writes errors to log. """
         message = bcolors['FAIL'] + message + bcolors['ENDC']
         self.writeToErrorFile(message)
         sys.exit(message)
         self.error_status = True
     
     def reportWarning(self, message) -> None:
-        ''' Prints warnings to terminal, and writes warnings to log
-        '''
+        """ Prints warnings to terminal, and writes warnings to log. """
         message = bcolors['WARNING'] + message + bcolors['ENDC']
         self.writeToErrorFile(message)
         print(message)
 
 
     def writeToErrorFile(self, message) -> None:
-        ''' Writes error messages to text file
-        '''
+        """ Writes error messages to text file. """
         ef = open(self.error_file,'w')
         ef.write(message)
         ef.close()
@@ -76,30 +72,30 @@ class Compiler():
 
 def main(input_file, quiet=False, output_file="output", print_all=False, name=False,
                 print_scan=False, print_parse=False, clear=False) -> None:
-    """Main function.
+    """ Main function.
 
-    Parameters
-    ----------
-    input_file: str:
-        Path the input file.
-    output_file: str
-        Path to the output file. Default is 'output'
-    quiet: bool
-        Rather non-errors should be printed. Default is False
-    print_parse: bool:
-        Prints out the recursive calls of the parser. Default is False
-    print_scan: bool:
-        Prints out the scanned tokens. Default is False
-    print_all: bool:
-        Prints out everything. Default is False
-    Returns
-    -------
-    int
-        The exit code.
-    Raises
-    ------
-    FileNotFoundError
-        Means that the input file was not found.
+        Parameters
+        ----------
+        input_file: str:
+          Path the input file.
+        output_file: str
+          Path to the output file. Default is 'output'
+        quiet: bool
+          Rather non-errors should be printed. Default is False
+        print_parse: bool:
+          Prints out the recursive calls of the parser. Default is False
+        print_scan: bool:
+          Prints out the scanned tokens. Default is False
+        print_all: bool:
+          Prints out everything. Default is False
+        Returns
+        -------
+        int
+          The exit code.
+        Raises
+        ------
+        FileNotFoundError
+          Means that the input file was not found.
     """
     #from timer import Timer
     from scanner import Scanner

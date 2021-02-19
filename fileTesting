@@ -1,6 +1,6 @@
 #!/bin/bash
 # a bash script to run every file in the test programs directory
-# testPgms/correct/.
+# compiler_theory_test_programs/correct/.
 clear;
 for file in ./compiler_theory_test_programs/correct/*.src; do
 	python3 main.py "$file" -n
