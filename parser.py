@@ -79,7 +79,7 @@ class Parser(Compiler):
 
     def program(self) -> None:
         ''' <program> ::= 
-                <program_header><program_body>.
+                <program_header><program_body> .
         '''
         if self.print_bool: print("program")
         # might not need to use a WHILE loop here

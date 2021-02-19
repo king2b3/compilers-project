@@ -72,8 +72,11 @@ class Scanner(Compiler):
         ''' Eats comments until next non-comment char is found
         '''
         while self.current_char == '/' and (self.peek() == '*' or self.peek() == '/'):
+            #print('Comment found')
             # multiline comment
             if self.peek() == '*': 
+                #print('Multi-line comment found')
+                self.nextChar()
                 self.nextChar()
                 comment_not_ended = True
                 num_blocks = 1
@@ -87,14 +90,20 @@ class Scanner(Compiler):
                         comment_not_ended = False 
                         num_blocks = 0
                     if self.current_char == '*' and self.peek() == '/':
+                        #print('End of multiline found')
                         self.nextChar()
-                        self.nextChar()
+                        #self.nextChar()
                         num_blocks -= 1
                         comment_not_ended = False
                     elif self.current_char == '/' and self.peek() == '*':
+                        #print('Nested multiline found')
                         num_blocks += 1
+                        self.nextChar()
+                        self.nextChar()
+                self.nextChar()
 
             elif self.peek() == '/': #  single line comment 
+                #print('Single line comment found')
                 self.nextChar()
                 comment_not_ended = True
                 while comment_not_ended:

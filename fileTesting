@@ -2,6 +2,6 @@
 # a bash script to run every file in the test programs directory
 # testPgms/correct/.
 clear;
-for file in ./testPgms/correct/*.src; do
+for file in ./compiler_theory_test_programs/correct/*.src; do
 	python3 main.py "$file" -n
 done
