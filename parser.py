@@ -207,19 +207,15 @@ class Parser(Compiler):
         self.matchToken("type")
         self.identifier()
         self.matchToken("is")
-        self.type_mark()
+        self.type_def()
     
-    def type_mark(self) -> None:
-        """ <type_mark> ::=
-                  integer | float | string | bool
-                | <identifier>
+    def type_def(self) -> None:
+        """ <type_def> ::=
+                  <type_mark>
                 | enum {<identifier> ( , <identifier> )* }
         """
-        if self.print_bool: print("type mark")
-        if (self.checkToken("integer") or self.checkToken("float") or self.checkToken("string") or
-                self.checkToken("bool")):
-            self.nextToken()
-        elif checkToken("enum"):
+        if self.print_bool: print("type def")
+        if checkToken("enum"):
             self.nextToken()
             self.matchToken("{")
             self.identifier()
@@ -227,6 +223,19 @@ class Parser(Compiler):
                 self.nextToken()
                 self.identifier()
             self.matchToken("}")
+        else:
+            self.type_mark()
+
+    
+    def type_mark(self) -> None:
+        """ <type_mark> ::=
+                  integer | float | string | bool
+                | <identifier>
+        """
+        if self.print_bool: print("type mark")
+        if (self.checkToken("integer") or self.checkToken("float") or self.checkToken("string") or
+                self.checkToken("bool")):
+            self.nextToken()
         else:
             self.identifier()
     
