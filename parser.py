@@ -225,7 +225,6 @@ class Parser(Compiler):
             self.matchToken("}")
         else:
             self.type_mark()
-
     
     def type_mark(self) -> None:
         """ <type_mark> ::=

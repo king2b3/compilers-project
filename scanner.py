@@ -131,8 +131,8 @@ class Scanner(Compiler):
             self.nextChar()
             token = self.getToken()
 
-        elif self.current_char == '>' or self.current_char == '<' or self.current_char == '!' or
-                self.current_char == ':' or self.current_char == '=':
+        elif (self.current_char == '>' or self.current_char == '<' or self.current_char == '!' or
+                self.current_char == ':' or self.current_char == '='):
             """ Relation tokens """
             if self.peek() == '=':
                 # Two character tokens
