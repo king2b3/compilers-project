@@ -124,8 +124,6 @@ class Parser(Compiler):
             self.procedure_decleration()
         elif self.checkToken("variable"):
             self.variable_decleration()
-        else:
-            self.type_decleration()
         
     def procedure_decleration(self) -> None:
         """ <procedure_decleration> ::=
@@ -134,6 +132,7 @@ class Parser(Compiler):
         if self.print_bool: print("procedure decleration")
         self.procedure_header()
         self.procedure_body()
+        # remove local table from stack
 
     def procedure_header(self) -> None:
         """ <procedure_header> ::=
@@ -141,6 +140,7 @@ class Parser(Compiler):
         """
         if self.print_bool: print("procedure header")
         self.matchToken("procedure")
+        # add 
         self.identifier()
         self.matchToken(":")
         self.type_mark()
@@ -491,7 +491,6 @@ class Parser(Compiler):
                 | false
         """
         if self.print_bool: print("factor")
-        
         if self.checkToken("("):
             self.nextToken()
             self.expression()
