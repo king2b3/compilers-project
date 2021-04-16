@@ -9,11 +9,15 @@ from main import Compiler
 from scanner import Scanner
 from tokens import *
 from global_params import *
+from symbol import SymbolTable
 
 class Parser(Compiler):
     """ Class for the parser. Contains methods needed for parse, and calls the scanner. """    
     def __init__(self, filename, sprint_bool=False,print_bool=False, error_file='error_log.txt') -> None:
         self.s = Scanner(filename)
+        self.t = SymbolTable()
+        # bool to hold if we are in the global space
+        self.level = 0
         self.current_token = Null()
         self.next_token = Null()
         self.print_bool = print_bool
@@ -116,6 +120,7 @@ class Parser(Compiler):
                 | [global] <variable_decleration> 
         """
         if self.print_bool: print("decleration")
+
         if self.checkToken("global"):
             if self.print_bool: print("global")
             self.nextToken()
@@ -132,6 +137,8 @@ class Parser(Compiler):
         self.procedure_header()
         self.procedure_body()
         # remove local table from stack
+        if self.print_bool: print(t)
+        t.pop_stack()
 
     def procedure_header(self) -> None:
         """ <procedure_header> ::=
@@ -140,7 +147,8 @@ class Parser(Compiler):
         if self.print_bool: print("procedure header")
         self.matchToken("procedure")
         # add procedure to local table stack
-        # make a temp type variable in parser to store type of the identifier? would remove need to pass type through calls
+        self.t.insert(self.current_token, "procedure", True)
+        # assuming current token is procedure name. Parser will throw error if not
         self.identifier()
         self.matchToken(":")
         self.type_mark()

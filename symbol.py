@@ -11,11 +11,8 @@
     Created by: Bayley King (https://github.com/king2b3)
 """
 
-from collections import defaultdict
 import time
 
-def def_value():
-    return None
 
 class SymbolTable(object):
     def __init__(self) -> None:
@@ -93,15 +90,12 @@ class SymbolTable(object):
 
 class Table(object):
     def __init__(self) -> None:
-        self.table = defaultdict(def_value)
+        self.table = {}
 
     def lookup(self, name) -> str:
         """ Will return None if the entry doesn't exist
         """
-        if name in self.table:
-            return self.table[name]
-        else:
-            return None
+        return self.table.get(name)
     
     def insert(self, symbol, symbol_type) -> None:
         """ Adds a symbol to the table
@@ -130,7 +124,7 @@ def main():
     t.lookup('test')
     print(t)
 
-    '''
+    
     t.append_stack('b','int')
     t.local_table[-1].insert('d','str')
     
@@ -141,7 +135,6 @@ def main():
     print(t.lookup('a'))
     print(t.lookup('no'))
     print(t)
-    '''
 
 
 if __name__ == "__main__":
