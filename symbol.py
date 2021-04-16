@@ -67,11 +67,11 @@ class SymbolTable(object):
         # if the code path somehow gets here, run away screaming
         return 0 
 
-    def append_stack(self, name, symbol_type) -> None:
+    def append_stack(self) -> None:#, name, symbol_type) -> None:
         """ Creates a new local table, appends onto list 
         """
         self.local_table.append(Table())
-        self.local_table[-1].insert(name, symbol_type)
+        #self.local_table[-1].insert(name, symbol_type)
     
     def pop_stack(self) -> None:
         """ Pops the local table off of the stack
@@ -79,12 +79,14 @@ class SymbolTable(object):
         self.local_table.pop()
     
     def __str__(self) -> str:
-        temp_str = f"Global Symbol Table: \n"
+        temp_str = f"############\nSymbol Table\n############\n"
+        temp_str += f"Global Symbol Table: \n"
         temp_str += self.global_table.__str__()
         for i in self.local_table:
             temp_str += '\n'
             temp_str += f"Local Symbol Table: \n"
             temp_str += i.__str__()
+        temp_str += f"\n############\nEnd of Table\n############"
         return temp_str
 
 
@@ -125,10 +127,12 @@ def main():
     print(t)
 
     
-    t.append_stack('b','int')
+    t.append_stack()
+    t.local_table[-1].insert('b','int')
     t.local_table[-1].insert('d','str')
     
-    t.append_stack('e','int')
+    t.append_stack()
+    t.local_table[-1].insert('e','int')
     t.local_table[-1].insert('f','str')
     print(t)
     
