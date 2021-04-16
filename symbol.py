@@ -23,50 +23,52 @@ class SymbolTable(object):
         # local tables are a looked at like a stack. pop and append list to act like a stack
         self.local_table = []
 
-    def lookup(self) -> str:
+    def lookup(self, name) -> str:
         """ Looks through tables (based off of current location)
 
             Returns None if the entry doesn't exist
         """
-        if self.global_table.lookup() != None:
+        if (symbol := self.global_table.lookup(name)) != None:
             # variable exists in the global table
-            ...
-        elif self.local_table.lookup() != None:
+            return symbol
+        elif len(self.local_table) == 0:
+            # Doesn't exist in global, and local doesn't exist yet
+            return None
+        elif (symbol := self.local_table[-1].lookup(name)) != None:
             # variable exists in the local table
-            ...
+            return symbol
         else:
             # variable isn't defined
-            ...
+            return None
     
     def insert(self, name:str, symbol_type:str, table_type:bool) -> int:
         """ Checks if the variable already exists in the table
-
-            If not, then it will add the 
         """
         if table_type:
-            # Insert into the local table
-            if self.local_table.lookup() == None:
+            # try to insert into the local table
+            if self.local_table[-1].lookup(name) == None:
                 # variable does not exist in the local table
-                if self.global_table.lookup() == None:
-                    # variable does not exist in the global table
-                    # can be added to the local table
-                    ...
-                else:
-                    # variable exists in the global table, but not in the local table
-                    ...
+                # it can exist in the global table, but this is a shadow 
+                self.local_table[-1].insert(name, symbol_type)
+                # success
+                return 1
             else:
-                # variable is already defined
-                ...
+                # variable is already defined in the local table
+                # throws error. redefined variable
+                return 0
         else:
-            # Insert into the global table
-            if self.global_table.lookup() == None:
+            # Try to insert into the global table
+            if self.global_table.lookup(name) == None:
                 self.global_table.insert(name, symbol_type)
                 # success
                 return 1
             else:
-                # failure 
+                # throws error, redefined variable
+                # already exists in global table
                 return 0
-                ...
+        
+        # if the code path somehow gets here, run away screaming
+        return 0 
 
     def append_stack(self, name, symbol_type) -> None:
         """ Creates a new local table, appends onto list 
@@ -94,15 +96,21 @@ class Table(object):
         self.table = defaultdict(def_value)
 
     def lookup(self, name) -> str:
-        """ Will return None if the entry doesn't exist """
-        return self.table[name]
+        """ Will return None if the entry doesn't exist
+        """
+        if name in self.table:
+            return self.table[name]
+        else:
+            return None
     
     def insert(self, symbol, symbol_type) -> None:
-        """ Adds a symbol to the table. If symbol is already in the table, pass """
+        """ Adds a symbol to the table
+        """
         self.table[symbol] = symbol_type
     
     def __str__(self) -> str:
-        """ Printed representation of the table """
+        """ Printed representation of the table 
+        """
         temp_str = ""
         for entry in self.table:
             temp_str += f"{entry}:{self.table[entry]}\n"
@@ -110,13 +118,31 @@ class Table(object):
         return temp_str
 
 def main():
-    """ For testing purposes only """
+    """ For testing purposes only 
+    """
     t = SymbolTable()
     t.global_table.insert('a','int')
-    t.global_table.insert('c','bool')
-    t.local_table.insert('b','int')
-    t.local_table.insert('d','str')
     print(t)
+    
+    t.global_table.insert('c','bool')
+    print(t)
+    
+    t.lookup('test')
+    print(t)
+
+    '''
+    t.append_stack('b','int')
+    t.local_table[-1].insert('d','str')
+    
+    t.append_stack('e','int')
+    t.local_table[-1].insert('f','str')
+    print(t)
+    
+    print(t.lookup('a'))
+    print(t.lookup('no'))
+    print(t)
+    '''
+
 
 if __name__ == "__main__":
     main()

@@ -114,7 +114,6 @@ class Parser(Compiler):
         """ <decleration> ::=
                   [global] <procedure_decleration>
                 | [global] <variable_decleration> 
-                | [global] <type_decleration>
         """
         if self.print_bool: print("decleration")
         if self.checkToken("global"):
@@ -140,7 +139,8 @@ class Parser(Compiler):
         """
         if self.print_bool: print("procedure header")
         self.matchToken("procedure")
-        # add 
+        # add procedure to local table stack
+        # make a temp type variable in parser to store type of the identifier? would remove need to pass type through calls
         self.identifier()
         self.matchToken(":")
         self.type_mark()
@@ -198,45 +198,15 @@ class Parser(Compiler):
             self.nextToken()
             self.bound()
             self.matchToken("]")
-        
-    def type_decleration(self) -> None:
-        """ <type_decleration> ::=
-                type <identifier> is <type_mark>
-        """
-        if self.print_bool: print("type decleration")
-        self.matchToken("type")
-        self.identifier()
-        self.matchToken("is")
-        self.type_def()
-    
-    def type_def(self) -> None:
-        """ <type_def> ::=
-                  <type_mark>
-                | enum {<identifier> ( , <identifier> )* }
-        """
-        if self.print_bool: print("type def")
-        if checkToken("enum"):
-            self.nextToken()
-            self.matchToken("{")
-            self.identifier()
-            while self.checkToken(","):
-                self.nextToken()
-                self.identifier()
-            self.matchToken("}")
-        else:
-            self.type_mark()
     
     def type_mark(self) -> None:
         """ <type_mark> ::=
                   integer | float | string | bool
-                | <identifier>
         """
         if self.print_bool: print("type mark")
         if (self.checkToken("integer") or self.checkToken("float") or self.checkToken("string") or
                 self.checkToken("bool")):
             self.nextToken()
-        else:
-            self.identifier()
     
     def bound(self) -> None:
         """ <bound> ::=
