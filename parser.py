@@ -78,7 +78,19 @@ class Parser(Compiler):
         message = (f"{bcolors['FAIL']}ERROR: Re-declared variable {bcolors['BOLD']}{self.current_token.text}{bcolors['ENDC']}"
                 f"{bcolors['FAIL']} on line number {bcolors['UNDERLINE']}{self.s.line_counter + 1}{bcolors['ENDC']}")
         self.reportError(message)
-        print('HIIIIIIIIIIIIIIIIII')
+
+    def undefinedError(self, name) -> None:
+        """ Error message when variable is undefined in a scope. """
+        message = (f"{bcolors['FAIL']}ERROR: Undeclared variable {bcolors['BOLD']}{name}{bcolors['ENDC']}"
+                f"{bcolors['FAIL']} on line number {bcolors['UNDERLINE']}{self.s.line_counter + 1}{bcolors['ENDC']}")
+        self.reportError(message)
+
+    def typeError(self, name1, name2) -> None:
+        """ Error message when there is a type mismatch. """
+        message = (f"{bcolors['FAIL']}ERROR: Type mistmatch {bcolors['BOLD']}{name1}{bcolors['ENDC']}"
+                f"{bcolors['FAIL']} and {bcolors['BOLD']}{name2}{bcolors['ENDC']}"
+                f"{bcolors['FAIL']} on line number {bcolors['UNDERLINE']}{self.s.line_counter + 1}{bcolors['ENDC']}")
+        self.reportError(message)
 
     def symbolTableAdd(self, name=None, symbol=None, layer=None) -> None:
         """ Adds a symbol to the symbol table, across either scope. """
@@ -90,16 +102,26 @@ class Parser(Compiler):
         if not symbol:
             symbol = self.next_token
 
-        #if self.print_bool: print(self.t)
         if not self.t.insert(name, symbol, layer):
-            # throw error, tried to redefine a variable
             self.redefinedError()
         if self.print_bool: print(self.t)
-        # assuming current token is procedure name. Parser will throw error if not
     
-    def type_check(self) -> None:
+    def type_check(self, name1, name2) -> None:
         """ Checks the type of two variables from the table """
-        ...   
+        if (type1 := t.lookup(name1)) == None:
+            self.undefinedError(name1)
+        if (type2 := t.lookup(name2)) == None:
+            self.undefinedError(name2)
+
+        # int and floats can be mixed
+        if type1 == "float" or type1 == "integer":
+            if type2 != "float" and type2 != "int":
+                self.typeError(type1, type2)
+
+        # bool (> < == =) int is okay. 0 is false, else is true
+        if type1 == "bool" or type1 == "integer":
+            if type2 != "boolean" and type2 != "integer":
+                self.typeError(type1, type2)
     
     def parse(self):
         self.c.write_line("void main(){\n")
