@@ -12,6 +12,7 @@ from tokens import *
 from global_params import *
 from symbol import SymbolTable
 from codegen import CodeGen
+from typecheck import TypeCheck
 
 class Parser(Compiler):
     """ Class for the parser. Contains methods needed for parse, and calls the scanner. """    
@@ -20,6 +21,7 @@ class Parser(Compiler):
         self.s = Scanner(filename)
         self.t = SymbolTable()
         self.c = CodeGen(filename)
+        self.tc = TypeCheck()
         # bool to hold if we are in the global space
         self.level = 0
         # variable declerations
@@ -38,7 +40,6 @@ class Parser(Compiler):
         if self.sprint_bool: print("TOKEN: ",self.current_token,self.current_token.kind)
         self.next_token = self.s.getToken()
 
-    
     def checkToken(self, check_token) -> bool:
         """ Checks if the current token is the same as the expected token """
         return check_token == self.current_token.text
@@ -113,15 +114,7 @@ class Parser(Compiler):
         if (type2 := t.lookup(name2)) == None:
             self.undefinedError(name2)
 
-        # int and floats can be mixed
-        if type1 == "float" or type1 == "integer":
-            if type2 != "float" and type2 != "int":
-                self.typeError(type1, type2)
-
-        # bool (> < == =) int is okay. 0 is false, else is true
-        if type1 == "bool" or type1 == "integer":
-            if type2 != "boolean" and type2 != "integer":
-                self.typeError(type1, type2)
+        tc.type_check(type1, type2)
     
     def parse(self):
         self.c.write_line("void main(){\n")
