@@ -1,1 +1,1 @@
-[91m[91mERROR: Re-declared variable [1mvariable[0m[91m on line number [4m7[0m[0m
+[91m[91mERROR: Unexpected token '[1mNone[0m[91m' on line number [4m12[0m[91m. ':' expected.[0m[0m

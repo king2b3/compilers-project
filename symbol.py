@@ -55,7 +55,7 @@ class SymbolTable(object):
                 return 0
         else:
             # Try to insert into the global table
-            if self.global_table.lookup(name) == None:
+            if self.global_table.table.get(name) == None:
                 self.global_table.insert(name, symbol_type)
                 # success
                 return 1
@@ -117,28 +117,8 @@ def main():
     """ For testing purposes only 
     """
     t = SymbolTable()
-    t.global_table.insert('a','int')
-    print(t)
-    
-    t.global_table.insert('c','bool')
-    print(t)
-    
-    t.lookup('test')
-    print(t)
-
-    
-    t.append_stack()
-    t.local_table[-1].insert('b','int')
-    t.local_table[-1].insert('d','str')
-    
-    t.append_stack()
-    t.local_table[-1].insert('e','int')
-    t.local_table[-1].insert('f','str')
-    print(t)
-    
-    print(t.lookup('a'))
-    print(t.lookup('no'))
-    print(t)
+    print(t.insert('a','integer',0))
+    print(t.insert('a','float',0))
 
 
 if __name__ == "__main__":

@@ -5,14 +5,15 @@
     Created by: Bayley King (https://github.com/king2b3)
 """
 
+# libraries
 from datetime import datetime
 
-
 class CodeGen():
-    """ Structure to generate code from the parser
-    """
+    """ Structure to generate code from the parser """
     def __init__(self, filename) -> None:
         self.file_out_name = "temp_code_gen.c"
+        # once an error is detected the code gen is stopped
+        self.status = True
         # inits the files
         self.new_write_line("//Temp restricted C program generated from parser\n")
         # grabs the date and time of initial generation
@@ -30,15 +31,17 @@ class CodeGen():
         
     def new_write_line(self, line):
         """ Creates the new file, or overwrites the old one """
-        with open(self.file_out_name,'w') as fout:
-            fout.write(line)
+        if self.status:
+            with open(self.file_out_name,'w') as fout:
+                fout.write(line)
     
     def write_line(self, line):
         """ Appends a new line """
-        with open(self.file_out_name,'a') as fout:
-            fout.write(line)
+        if self.status:
+            with open(self.file_out_name,'a') as fout:
+                fout.write(line)
 
-    
+
 def main():
     # tests the code gen file
     c = CodeGen('math.src')

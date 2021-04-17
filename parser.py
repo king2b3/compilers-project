@@ -5,6 +5,7 @@
     Created by: Bayley King (https://github.com/king2b3)
 """
 
+# file imports
 from main import Compiler
 from scanner import Scanner
 from tokens import *
@@ -77,27 +78,32 @@ class Parser(Compiler):
         message = (f"{bcolors['FAIL']}ERROR: Re-declared variable {bcolors['BOLD']}{self.current_token.text}{bcolors['ENDC']}"
                 f"{bcolors['FAIL']} on line number {bcolors['UNDERLINE']}{self.s.line_counter + 1}{bcolors['ENDC']}")
         self.reportError(message)
+        print('HIIIIIIIIIIIIIIIIII')
 
     def symbolTableAdd(self, name=None, symbol=None, layer=None) -> None:
+        """ Adds a symbol to the symbol table, across either scope. """
         # allows for passed params or taken from class variables
-        if not layer:
+        if layer == None:
             layer = self.level
         if not name:
             name = self.current_token.text
         if not symbol:
             symbol = self.next_token
 
-        if self.print_bool: print(self.t)
+        #if self.print_bool: print(self.t)
         if not self.t.insert(name, symbol, layer):
             # throw error, tried to redefine a variable
             self.redefinedError()
         if self.print_bool: print(self.t)
         # assuming current token is procedure name. Parser will throw error if not
     
+    def type_check(self) -> None:
+        """ Checks the type of two variables from the table """
+        ...   
+    
     def parse(self):
         self.c.write_line("void main(){\n")
         self.program()
-        #self.c.write_line("return 0;\n}")
         self.c.write_line("}")
 
     ########################################################################
@@ -148,13 +154,12 @@ class Parser(Compiler):
                 | [global] <variable_decleration> 
         """
         if self.print_bool: print("decleration")
-
         if self.checkToken("global"):
             if self.print_bool: print("global")
             self.nextToken()
             # global add
-            if self.print_bool: print(f"\nGLOBAL ADDED\n")
-            self.symbolTableAdd(layer=0)
+            if self.print_bool: print(f"\nGlobal variable added\n")
+            self.level = 0
         if self.checkToken("procedure"):
             self.procedure_decleration()
         elif self.checkToken("variable"):
@@ -246,10 +251,10 @@ class Parser(Compiler):
         if self.print_bool: print("variable decleration")
         
         self.matchToken("variable")
-        temp_name = self.current_token
+        temp_name = self.current_token.text
         self.identifier()
         self.matchToken(":")
-        temp_val = self.current_token
+        temp_val = self.current_token.text
         self.symbolTableAdd(name=temp_name,symbol=temp_val)
         self.type_mark()
         if self.checkToken("["):
