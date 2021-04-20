@@ -12,7 +12,7 @@ from tokens import *
 from global_params import *
 from symbol import SymbolTable
 from codegen import CodeGen
-from typecheck import TypeCheck
+from typecheck import *
 
 class Parser(Compiler):
     """ Class for the parser. Contains methods needed for parse, and calls the scanner. """    
@@ -109,12 +109,36 @@ class Parser(Compiler):
     
     def type_check(self, name1, name2) -> None:
         """ Checks the type of two variables from the table """
+        if (type1 := self.t.lookup(name1)) == None:
+            self.undefinedError(name1)
+        if name2[0] == '"':
+            # type check for string literals
+            type2 = name2
+        elif (type2 := self.t.lookup(name2)) == None and \
+                self.id_type(name2) == "symbol" :
+            self.undefinedError(name2)
+        # calls the type check method
+        self.tc.type_check(type1, type2)
+    
+    def hard_check(self, name1, name2) -> None:
+        """ Hard check on procedure type checking """
         if (type1 := t.lookup(name1)) == None:
             self.undefinedError(name1)
         if (type2 := t.lookup(name2)) == None:
             self.undefinedError(name2)
+        # calls the type check method
+        tc.hard_check(type1, type2)
 
-        tc.type_check(type1, type2)
+    def id_type(self, val) -> str:
+        if (temp := checknum(val)):
+            if temp == "symbol":
+                #print('here')
+                return val
+            else:
+                return temp
+        else:
+            # sanity check error, shouldn't reach here in the code path
+            self.undefinedError(val)
     
     def parse(self):
         self.c.write_line("void main(){\n")
@@ -285,6 +309,8 @@ class Parser(Compiler):
         if (self.checkToken("integer") or self.checkToken("float") or self.checkToken("string") or
                 self.checkToken("bool")):
             self.nextToken()
+        else:
+            self.typeError(self.current_token.text, "integer, float, string, or bool")
     
     def bound(self) -> None:
         """ <bound> ::=
@@ -315,6 +341,7 @@ class Parser(Compiler):
                 <identifier> ( [<argument_list>] )
         """
         if self.print_bool: print("procedure call")
+
         self.identifier()
         self.matchToken("(")
         if not self.checkToken(")"):
@@ -326,10 +353,26 @@ class Parser(Compiler):
                 <destination> := <expression>
         """
         if self.print_bool: print("assignment statement")
+        # temp save of token for type checking
+        var1 = self.current_token.text
+        print(f"{self.current_token} {self.next_token}")
         self.destination()
         self.matchToken(":=")
+        
+        print(f"{self.current_token} {self.next_token}")
+        # type checking
+
+        ####### NEEDS TO BE MOVED ########
+        # put checks in calls? Or use returns?
+        var2 = self.current_token.text
+        if var2 == "-":
+            self.nextToken()
+            var2 = self.current_token.text
+            self.c.write_line("- ")
+        
         self.expression()
-    
+        self.type_check(var1, var2)
+
     def destination(self) -> None:
         """ <destination> ::=
                 <identifier> [[<expression>]]

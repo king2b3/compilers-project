@@ -19,6 +19,13 @@ class SymbolTable(object):
         self.global_table = Table()
         # local tables are a looked at like a stack. pop and append list to act like a stack
         self.local_table = []
+        
+        # insert built-in functions to global table
+        self.insert("putbool", "bool", 0)
+        self.insert("getinteger", "integer", 0)
+        self.insert("putfloat", "float", 0)
+        self.insert("putstring", "string", 0)
+        self.insert("sqrt", "float", 0)
 
     def lookup(self, name) -> str:
         """ Looks through tables (based off of current location)

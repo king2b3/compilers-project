@@ -62,7 +62,6 @@ class Compiler():
         self.writeToErrorFile(message)
         print(message)
 
-
     def writeToErrorFile(self, message) -> None:
         """ Writes error messages to text file. """
         ef = open(self.error_file,'w')
