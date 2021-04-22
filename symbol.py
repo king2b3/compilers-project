@@ -11,9 +11,6 @@
     Created by: Bayley King (https://github.com/king2b3)
 """
 
-import time
-
-
 class SymbolTable(object):
     def __init__(self) -> None:
         self.global_table = Table()
@@ -46,8 +43,7 @@ class SymbolTable(object):
             return None
     
     def insert(self, name:str, symbol_type:str, table_type:bool) -> int:
-        """ Checks if the variable already exists in the table
-        """
+        """ Checks if the variable already exists in the table """
         if table_type:
             # try to insert into the local table
             if self.local_table[-1].lookup(name) == None:
@@ -75,25 +71,23 @@ class SymbolTable(object):
         return 0 
 
     def append_stack(self) -> None:#, name, symbol_type) -> None:
-        """ Creates a new local table, appends onto list 
-        """
+        """ Creates a new local table, appends onto list """
         self.local_table.append(Table())
         #self.local_table[-1].insert(name, symbol_type)
     
     def pop_stack(self) -> None:
-        """ Pops the local table off of the stack
-        """
+        """ Pops the local table off of the stack"""
         self.local_table.pop()
     
     def __str__(self) -> str:
-        temp_str = f"############\nSymbol Table\n############\n"
+        temp_str = f"\n############\nSymbol Table\n############\n"
         temp_str += f"Global Symbol Table: \n"
         temp_str += self.global_table.__str__()
         for i in self.local_table:
             temp_str += '\n'
             temp_str += f"Local Symbol Table: \n"
             temp_str += i.__str__()
-        temp_str += f"\n############\nEnd of Table\n############"
+        temp_str += f"\n############\nEnd of Table\n############\n"
         return temp_str
 
 
@@ -102,8 +96,7 @@ class Table(object):
         self.table = {}
 
     def lookup(self, name) -> str:
-        """ Will return None if the entry doesn't exist
-        """
+        """ Will return None if the entry doesn't exist """
         return self.table.get(name)
     
     def insert(self, symbol, symbol_type) -> None:
@@ -112,8 +105,7 @@ class Table(object):
         self.table[symbol] = symbol_type
     
     def __str__(self) -> str:
-        """ Printed representation of the table 
-        """
+        """ Printed representation of the table """
         temp_str = ""
         for entry in self.table:
             temp_str += f"{entry}:{self.table[entry]}\n"
@@ -121,8 +113,7 @@ class Table(object):
         return temp_str
 
 def main():
-    """ For testing purposes only 
-    """
+    """ For testing purposes only """
     t = SymbolTable()
     print(t.insert('a','integer',0))
     print(t.insert('a','float',0))

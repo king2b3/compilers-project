@@ -5,7 +5,7 @@
     Created by: Bayley King (https://github.com/king2b3)
 """
 
-from main import Compiler
+from compiler import Compiler
 from tokens import *
 from global_params import *
 
@@ -75,7 +75,10 @@ class Scanner(Compiler):
                     self.nextChar()
                     if self.current_char == '\0': 
                         # Multiline comment not ended before EOF
-                        error_msg = 'Multiline comment not ended on line' + str(self.line_counter +1)
+                        error_msg = '' + str(self.line_counter +1)
+
+                        message = (f"{bcolors['WARNING']}WARNING: Multiline comment not ended on line on line number {bcolors['ENDC']}"
+                               f"{bcolors['UNDERLINE']}{self.line_counter + 1}{bcolors['ENDC']}")
                         self.reportWarning(error_msg)
                         self.current_char = '\0'
                         comment_not_ended = False 
@@ -211,7 +214,7 @@ class Scanner(Compiler):
         
         return token
 
-def main(input_file='compiler_theory_test_programs/correct/source.src'):
+def main(input_file='compiler_theory_test_programs/correct/type_checking_test.src'):
     """ For testing purposes only """
     from os import system
     system("clear")

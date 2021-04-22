@@ -10,8 +10,6 @@ import os
 import re
 from global_params import *
 import sys
-#from scanner import Scanner
-
 
 def parse_arguments(
     args=None
@@ -35,6 +33,8 @@ def parse_arguments(
             default=False, action="store_true")
     parser.add_argument("-pp", "--print_parse", help="Prints out the parsing",
             default=False, action="store_true")
+    parser.add_argument("-pt", "--print_table", help="Prints out the symbol table whenever changed",
+            default=False, action="store_true")
     parser.add_argument("-n", "--name", help="Prints file name",
             default=False, action="store_true")
     parser.add_argument("-c", "--clear", help="clears the screen",
@@ -42,35 +42,9 @@ def parse_arguments(
     args = parser.parse_args(args=args)
     return args
 
-class Compiler():
-    def __init__(self, filename, error_file='error_log.txt') -> None:
-        self.filename = filename
-        self.line_counter = 0
-        self.error_status = None
-        self.error_file = error_file
-
-    def reportError(self, message) -> None:
-        """ Prints error to terminal, and writes errors to log. """
-        message = bcolors['FAIL'] + message + bcolors['ENDC']
-        self.writeToErrorFile(message)
-        sys.exit(message)
-        self.error_status = True
-    
-    def reportWarning(self, message) -> None:
-        """ Prints warnings to terminal, and writes warnings to log. """
-        message = bcolors['WARNING'] + message + bcolors['ENDC']
-        self.writeToErrorFile(message)
-        print(message)
-
-    def writeToErrorFile(self, message) -> None:
-        """ Writes error messages to text file. """
-        ef = open(self.error_file,'w')
-        ef.write(message)
-        ef.close()
-
 
 def main(input_file, quiet=False, output_file="output", print_all=False, name=False,
-                print_scan=False, print_parse=False, clear=False) -> None:
+                print_scan=False, print_parse=False, clear=False, print_table=False) -> None:
     """ Main function.
 
         Parameters
@@ -85,6 +59,8 @@ def main(input_file, quiet=False, output_file="output", print_all=False, name=Fa
           Prints out the recursive calls of the parser. Default is False
         print_scan: bool:
           Prints out the scanned tokens. Default is False
+        print_table: bool:
+          Prints our the symbol table. Default is False
         print_all: bool:
           Prints out everything. Default is False
         Returns
@@ -96,13 +72,12 @@ def main(input_file, quiet=False, output_file="output", print_all=False, name=Fa
         FileNotFoundError
           Means that the input file was not found.
     """
-    #from timer import Timer
-    from scanner import Scanner
     from parser import Parser
     from timer import Timer
     from os import system
     if clear: system("clear")
 
+    # timer class I use for most projects
     compiler_timer = Timer()
     
     # Error check if the file even exists
@@ -113,8 +88,14 @@ def main(input_file, quiet=False, output_file="output", print_all=False, name=Fa
         print('#######################')
         print(input_file)
         print('#######################')
+    
+    if print_all:
+      print_scan = True
+      print_parse = True
+      print_table = True
+
     compiler_timer.start_timer()
-    p = Parser(input_file,print_bool=print_parse,sprint_bool=print_scan)
+    p = Parser(input_file,print_bool=print_parse,sprint_bool=print_scan,print_table=print_table)
     p.parse()
     compiler_timer.end_timer()
     print(compiler_timer.__str__())

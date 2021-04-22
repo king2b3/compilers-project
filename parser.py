@@ -6,7 +6,7 @@
 """
 
 # file imports
-from main import Compiler
+from compiler import Compiler
 from scanner import Scanner
 from tokens import *
 from global_params import *
@@ -16,7 +16,7 @@ from typecheck import *
 
 class Parser(Compiler):
     """ Class for the parser. Contains methods needed for parse, and calls the scanner. """    
-    def __init__(self, filename, sprint_bool=False,print_bool=False, error_file='error_log.txt') -> None:
+    def __init__(self, filename, sprint_bool=False,print_bool=False, error_file='error_log.txt', print_table=False) -> None:
         # inits of other classes
         self.s = Scanner(filename)
         self.t = SymbolTable()
@@ -28,17 +28,21 @@ class Parser(Compiler):
         self.print_bool = print_bool
         self.error_file = error_file
         self.sprint_bool = sprint_bool
+        self.print_table = print_table
         # populates the first current and next tokens from the scanner
         self.current_token = Null()
         self.next_token = Null()
+        self.third_token = Null()
+        self.nextToken()
         self.nextToken()
         self.nextToken()
 
     def nextToken(self) -> None:
         """ Gets the next token for current and next self variables """
         self.current_token = self.next_token
-        if self.sprint_bool: print("TOKEN: ",self.current_token,self.current_token.kind)
-        self.next_token = self.s.getToken()
+        if self.sprint_bool: print(f"\tCurrent Token {self.current_token.text}\t\tToken Kind{self.current_token.kind}")
+        self.next_token = self.third_token
+        self.third_token = self.s.getToken()
 
     def checkToken(self, check_token) -> bool:
         """ Checks if the current token is the same as the expected token """
@@ -105,10 +109,18 @@ class Parser(Compiler):
 
         if not self.t.insert(name, symbol, layer):
             self.redefinedError()
-        if self.print_bool: print(self.t)
+        if self.print_table: print(self.t)
     
     def type_check(self, name1, name2) -> None:
         """ Checks the type of two variables from the table """
+        if self.print_table: print(self.t)
+        
+        if name1 == "(":
+            name1 = self.next_token.text
+            name2 = self.third_token.text
+        if name2 == "(":
+            name2 = self.third_token.text
+
         if (type1 := self.t.lookup(name1)) == None:
             self.undefinedError(name1)
         if name2[0] == '"':
@@ -132,7 +144,6 @@ class Parser(Compiler):
     def id_type(self, val) -> str:
         if (temp := checknum(val)):
             if temp == "symbol":
-                #print('here')
                 return val
             else:
                 return temp
@@ -210,17 +221,17 @@ class Parser(Compiler):
         """
         if self.print_bool: print("procedure decleration")
         # add local table from stack
-        if self.print_bool: print(self.t)
+        if self.print_table: print(self.t)
         self.t.append_stack()
-        if self.print_bool: print(f"STACK APPENDED\n")
-        if self.print_bool: print(self.t)
+        if self.print_table: print(f"STACK APPENDED\n")
+        if self.print_table: print(self.t)
         self.procedure_header()
         self.procedure_body()
         # remove local table from stack
-        if self.print_bool: print(self.t)
+        if self.print_table: print(self.t)
         self.t.pop_stack()
-        if self.print_bool: print(f"\nSTACK POPPED\n")
-        if self.print_bool: print(self.t)
+        if self.print_table: print(f"\nSTACK POPPED\n")
+        if self.print_table: print(self.t)
         if len(self.t.local_table) == 0:
             self.level = 0
 
@@ -355,14 +366,9 @@ class Parser(Compiler):
         if self.print_bool: print("assignment statement")
         # temp save of token for type checking
         var1 = self.current_token.text
-        print(f"{self.current_token} {self.next_token}")
         self.destination()
         self.matchToken(":=")
         
-        print(f"{self.current_token} {self.next_token}")
-        # type checking
-
-        ####### NEEDS TO BE MOVED ########
         # put checks in calls? Or use returns?
         var2 = self.current_token.text
         if var2 == "-":

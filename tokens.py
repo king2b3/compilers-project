@@ -71,10 +71,7 @@ token_type = {
 """ Token Classes """
 
 class Token(object):
-    """ Base token class.
-
-        Not sure if it will turn abstract at some point.
-    """
+    """ Base token class. """
     def __init__(self, text) -> None:
         self.text = text
         self.kind = "None"

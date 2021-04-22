@@ -13,7 +13,7 @@ class TypeCheck():
     
     def type_check(self, type1:str, type2:str) -> int:
         """ Checks the type of two variables from the table.
-        Returns enum error type to parser class
+            Returns enum error type to parser class
         """
 
         # int and floats can be mixed
