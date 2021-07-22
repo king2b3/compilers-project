@@ -11,18 +11,20 @@ from tokens import *
 
 class TypeCheck():
     
-    def type_check(self, type1:str, type2:str) -> int:
+    def type_check(self, type1:str, type2:str, op:str=None) -> int:
         """ Checks the type of two variables from the table.
             Returns enum error type to parser class
         """
 
         # int and floats can be mixed
-        if (type1 == "float" or type1 == "integer") and (type2 != "float" and type2 != "integer"):
-            return 0
+        if (type1 == "float" or type1 == "integer") and (type2 == "float" and type2 == "integer") and \
+                (op == "+" or op == "-" or op == "/" or op == "*"):
+            return 1
 
-        # bool (> < == =) int is okay. 0 is false, else is true
-        elif (type1 == "bool" or type1 == "integer") and (type2 != "bool" and type2 != "integer"):
-            return 0
+        # bool (> < == =) int is okay 
+        elif (type1 == "bool" or type1 == "integer") and (type2 == "bool" and type2 == "integer") and \
+            (op == ">" or op == "<" or op == "=" or op == "==" or op == "!=" or op == ">=" or op == "<="):
+            return 1
     
         # normal case for assignment and comparison
         elif type1 != type2:
@@ -42,7 +44,7 @@ class TypeCheck():
 
 
 def isfloat(num) -> bool:
-    """ Self-made function to check is string is a float """
+    """ Self-made function to check if string is a float """
     try:
         float(num)
         return True

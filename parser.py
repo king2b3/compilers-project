@@ -337,6 +337,7 @@ class Parser(Compiler):
                 | <loop_statement>
                 | <return_statement>
         """
+        #### NEED TO RETURN TYPE ####
         if self.print_bool: print("statement")
         if self.checkToken("return"):
             self.return_statement()
@@ -363,6 +364,7 @@ class Parser(Compiler):
         """ <assignment_statement> ::=
                 <destination> := <expression>
         """
+        #### NEED TO RETURN TYPE ####
         if self.print_bool: print("assignment statement")
         # temp save of token for type checking
         var1 = self.current_token.text
@@ -436,6 +438,7 @@ class Parser(Compiler):
         """ <return_statement> ::=
                 return <expression>
         """
+        #### NEED TO RETURN TYPE ####
         if self.print_bool: print("return")
         self.matchToken("return")
         self.expression()
@@ -461,6 +464,7 @@ class Parser(Compiler):
             <expression> ::=
                 [not] <arithOp> <expression_prime>
         """
+        #### NEED TO RETURN TYPE ####
         if self.print_bool: print("expression")
         if self.checkToken("not"):
             self.nextToken()
@@ -492,6 +496,7 @@ class Parser(Compiler):
             <arithOp> ::=
                 <relation> <arithOp_prime>
         """
+        #### NEED TO RETURN TYPE ####
         if self.print_bool: print("artih op")
         self.relation()
         self.arithOp_prime()
@@ -530,6 +535,7 @@ class Parser(Compiler):
                 <term> <relation_prime>
 
         """
+        #### NEED TO RETURN TYPE ####
         if self.print_bool: print("relation")
         self.term()
         self.relation_prime()
@@ -563,6 +569,7 @@ class Parser(Compiler):
             <term> ::=
                 <factor> <term_prime>
         """
+        #### NEED TO RETURN TYPE ####
         if self.print_bool: print("term")
         self.factor()
         self.term_prime()
@@ -590,6 +597,7 @@ class Parser(Compiler):
                 | true
                 | false
         """
+        #### NEED TO RETURN TYPE ####
         if self.print_bool: print("factor")
         if self.checkToken("("):
             self.nextToken()
@@ -620,6 +628,7 @@ class Parser(Compiler):
         """ <name> ::=
                 <identifier> [ [<expression>] ]
         """
+        #### NEED TO RETURN TYPE ####
         if self.print_bool: print("name")
         self.identifier()
         if self.checkToken("["):
